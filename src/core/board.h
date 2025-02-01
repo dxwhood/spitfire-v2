@@ -55,6 +55,11 @@ constexpr std::array<const char*, 12> pieceNames = {
     "Black Pawn", "Black Knight", "Black Bishop", "Black Rook", "Black Queen", "Black King"
 };
 
+// Colors
+enum class Color : int {
+    WHITE, BLACK
+};
+
 // Converts enum classes instances to their int equivalent
 template <typename Enum>
 constexpr int enumToInt(Enum e) {

@@ -12,9 +12,7 @@ int main() {
     board.printPiece(chess::PieceType::WHITE_PAWN);
     std::cout<<std::endl;
     
-    for (int i=0; i<64; i++){
-        board.printBitboard(KNIGHT_MOVES[i]);
-    }
+    board.printBitboard(chess::Moves::kingPseudo(board, Square::A1, Color::WHITE));
 
     return 0;
 }
