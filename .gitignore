@@ -1,0 +1,61 @@
+# Ignore build artifacts and compiled binaries
+/Spitfire-v2
+/CMakeCache.txt
+/cmake_install.cmake
+/CMakeFiles/
+/Makefile
+/tests/*.o
+/tests/*.out
+
+# Ignore generated object files and dependency files
+*.o
+*.obj
+*.so
+*.a
+*.lib
+*.dll
+*.dylib
+*.exe
+
+# Ignore all compiled output
+bin/
+build/
+dist/
+out/
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Ignore editor & IDE files
+.vscode/
+.idea/
+*.code-workspace
+
+# Ignore CMake output directories
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+
+# Ignore test executables and coverage reports
+/tests/*.gcda
+/tests/*.gcno
+/tests/*.gcov
+/tests/*.out
+/tests/*.exe
+
+# Ignore debugging files
+gmon.out
+vgcore.*
+*.stackdump
+
+# Ignore scratch notes and temporary project files
+notes.txt
+scratch.txt
