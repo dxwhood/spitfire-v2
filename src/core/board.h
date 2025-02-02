@@ -3,6 +3,7 @@
 #include <cstdint>  // Standard integer types
 #include <array>
 #include <string>
+#include <iostream>
 
 
 namespace chess {
@@ -17,6 +18,10 @@ constexpr uint64_t F_FILE = 0x2020202020202020ULL;
 constexpr uint64_t G_FILE = 0x4040404040404040ULL;
 constexpr uint64_t H_FILE = 0x8080808080808080ULL;
 
+constexpr std::array<uint64_t, 8> FILE_MASKS = {
+    A_FILE, B_FILE, C_FILE, D_FILE, E_FILE, F_FILE, G_FILE, H_FILE
+};
+
 // Rank bitboards
 constexpr uint64_t RANK_1 = 0x00000000000000FFULL;
 constexpr uint64_t RANK_2 = 0x000000000000FF00ULL;
@@ -26,6 +31,10 @@ constexpr uint64_t RANK_5 = 0x000000FF00000000ULL;
 constexpr uint64_t RANK_6 = 0x0000FF0000000000ULL;
 constexpr uint64_t RANK_7 = 0x00FF000000000000ULL;
 constexpr uint64_t RANK_8 = 0xFF00000000000000ULL;
+
+constexpr std::array<uint64_t, 8> RANK_MASKS = {
+    RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8
+};
 
 // Primary diagonal and antidiagonal bitboards
 constexpr uint64_t DIAGONAL_A1_H8 = 0x8040201008040201ULL;
@@ -57,6 +66,17 @@ constexpr std::array<uint64_t, 12> MID_GAME_POSITIONS = {
     0x2000000000000000ULL   // King on f8
 };
 
+// Files
+enum class File : int {
+    A_FILE, B_FILE, C_FILE, D_FILE, E_FILE, F_FILE, G_FILE, H_FILE
+};
+
+// Ranks
+
+enum class Rank: int {
+    RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8
+};
+
 // Squares
 enum class Square : int {
     A1 = 0, B1, C1, D1, E1, F1, G1, H1,
@@ -69,30 +89,24 @@ enum class Square : int {
     A8 = 56, B8, C8, D8, E8, F8, G8, H8
 };
 
+// File/Rank/Square conversions
+constexpr File getFile(Square square) {
+    return static_cast<File>(static_cast<int>(square) % 8);
+}
+
+constexpr Rank getRank(Square square) {
+    return static_cast<Rank>(static_cast<int>(square) / 8);
+}
+
+constexpr Square getSquare(File file, Rank rank) {
+    return static_cast<Square>(static_cast<int>(rank) * 8 + static_cast<int>(file));
+}
+
 // Piece Types
 enum class PieceType : int {
     WHITE_PAWN, WHITE_KNIGHT, WHITE_BISHOP, WHITE_ROOK, WHITE_QUEEN, WHITE_KING,
     BLACK_PAWN, BLACK_KNIGHT, BLACK_BISHOP, BLACK_ROOK, BLACK_QUEEN, BLACK_KING
 };
-
-// Helper Array for pieceType to String conversion
-constexpr std::array<const char*, 12> pieceNames = {
-    "White Pawn", "White Knight", "White Bishop", "White Rook", "White Queen", "White King",
-    "Black Pawn", "Black Knight", "Black Bishop", "Black Rook", "Black Queen", "Black King"
-};
-
-// Helper Array for pieceType to Char conversion
-constexpr std::array<const char, 12> pieceChars = {
-    'P', 'N', 'B', 'R', 'Q', 'K',
-    'p', 'n', 'b', 'r', 'q', 'k'
-};
-
-// Helper Array for pieceType to Unicode conversion
-constexpr std::array<const char*, 12> pieceUnicode = {
-    "♙", "♘", "♗", "♖", "♕", "♔",  // White pieces
-    "♟", "♞", "♝", "♜", "♛", "♚"   // Black pieces
-};
-
 
 // Colors
 enum class Color : int {
@@ -121,12 +135,8 @@ inline void clearBit(uint64_t &board, uint8_t pos){
 class Board {
 public:
     Board();  // Constructor
-    void printBoard() const;  // Prints the board for debugging
-    void printBoard(Square highlightSquare, uint64_t movesBitboard = 0ULL, bool highlight = true) const;
     void clearBoard();  // Clears the board
 
-    void printPiece(PieceType piece) const;  // Prints a bitboard for debugging
-    void printBitboard(uint64_t bitboard) const;  // Prints a bitboard for debugging
     void setPieces(uint64_t bitboard, PieceType piece); // Sets a piece type on the board based on a bitboard
     void clearPieceType(uint64_t bitboard, PieceType piece); // Clears a piece type on the board based on a bitboard
     void setPiece(Square square, PieceType piece);  // Sets a piece on the board
@@ -142,10 +152,12 @@ public:
     uint64_t getEmpty() const;
     uint64_t getWhiteOccupancy() const;
     uint64_t getBlackOccupancy() const;
+
+    std::array<uint64_t, 12> getBitboards() const;
     
 
 private:
-    uint64_t bitboards[12];  // Bitboard for each piece type
+    std::array<uint64_t, 12> bitboards;  // Bitboard for each piece type
 };
 
 

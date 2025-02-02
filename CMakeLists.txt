@@ -4,8 +4,10 @@ project(Spitfire-v2)
 set(CMAKE_CXX_STANDARD 20)
 
 # Include directories
-include_directories(${CMAKE_SOURCE_DIR}/src)      # Add src/ to include path
-include_directories(${CMAKE_SOURCE_DIR}/src/core) # Add src/core/ explicitly
+include_directories(${CMAKE_SOURCE_DIR}/src)      
+include_directories(${CMAKE_SOURCE_DIR}/src/core) 
+include_directories(${CMAKE_SOURCE_DIR}/src/utils) 
+
 
 # Source files
 add_executable(Spitfire-v2 
@@ -14,6 +16,8 @@ add_executable(Spitfire-v2
     src/core/board.cpp
     src/core/moves.h
     src/core/moves.cpp
+    src/utils/display.h
+    src/utils/display.cpp
 )
 
 # Link any required libraries (if needed)
