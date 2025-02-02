@@ -49,10 +49,15 @@ namespace Moves{
         0x2838000000000000ULL, 0x5070000000000000ULL, 0xA0E0000000000000ULL, 0x40C0000000000000ULL
     };
 
+    uint64_t pseudoLegal(Board &board, Square square);
 
-    uint64_t kingPseudo(Board &board, Square square, Color color);
-    uint64_t knightPseudo(Board &board, Square square, Color color);
-    
+    uint64_t kingPseudo(Board &board, Square square);
+    uint64_t knightPseudo(Board &board, Square square);
+    uint64_t pawnPseudo(Board &board, Square square);
+    uint64_t rookPseudo(Board &board, Square square);
+    uint64_t queenPseudo(Board &board, Square square);
+    uint64_t bishopPseudo(Board &board, Square square);
+
 
 
 };
