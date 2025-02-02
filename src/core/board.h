@@ -139,7 +139,7 @@ public:
 
     void setPieces(uint64_t bitboard, PieceType piece); // Sets a piece type on the board based on a bitboard
     void clearPieceType(uint64_t bitboard, PieceType piece); // Clears a piece type on the board based on a bitboard
-    void setPiece(Square square, PieceType piece);  // Sets a piece on the board
+    void setPiece(PieceType piece, Square square);  // Sets a piece on the board
     void clearPiece(Square square);  // Clears a piece on the board
     void setDefaultPosition();  // Sets the default starting position
     void setDebugPosition();  // Sets the mid game position for debugging

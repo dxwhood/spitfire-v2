@@ -38,7 +38,7 @@ void Board::setDebugPosition(){
     }
 }
 
-void Board::setPiece(Square square, PieceType piece){
+void Board::setPiece(PieceType piece, Square square){
     setBit(bitboards[enumToInt(piece)], enumToInt(square));
 }
 
