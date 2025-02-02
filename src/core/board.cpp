@@ -53,9 +53,14 @@ void Board::printBoard(Square highlightSquare, uint64_t movesBitboard, bool high
     // Highlight colors.
     const std::string BG_HIGHLIGHT = "\033[43m";  // Yellow background for possible moves
     const std::string BG_SELECTED  = "\033[44m";  // Blue background for the selected piece
+    const std::string BG_CAPTURE   = "\033[41m";  // Red for capture moves
+
 
     // Convert highlightSquare enum to int for comparison
     int highlightIndex = static_cast<int>(highlightSquare);
+
+    // Get occupancy bitboard for highlighting
+    uint64_t occupiedSquares = getOccupancy();
 
     // Print the board.
     for (int i = 7; i >= 0; i--) {
@@ -68,7 +73,13 @@ void Board::printBoard(Square highlightSquare, uint64_t movesBitboard, bool high
                 bg = BG_SELECTED;  // Highlight selected piece
             }
             else if (highlight && getBit(movesBitboard, square)) {
-                bg = BG_HIGHLIGHT; // Highlight possible moves
+                if (getBit(occupiedSquares, square)) {
+                    bg = BG_CAPTURE;  // Highlight capture moves
+                }
+                else {
+                    bg = BG_HIGHLIGHT;  // Highlight possible moves
+                }
+                
             }
             else {
                 bool isLightSquare = ((i + j) % 2 == 0);
@@ -115,7 +126,7 @@ void Board::printBitboard(uint64_t bitboard) const{
 }
 
 
-void Board::setPieceType(uint64_t bitboard, PieceType piece){
+void Board::setPieces(uint64_t bitboard, PieceType piece){
     bitboards[enumToInt(piece)] = bitboard;
 }
 
@@ -147,7 +158,27 @@ void Board::clearPiece(Square square){
     }
 }
 
-uint64_t Board::getPieceType(PieceType piece) const{
+Color Board::getPieceColor(Square square) const{
+    for(int i=0; i<12; i++){
+        if(getBit(bitboards[i], enumToInt(square))){
+            return (i < 6)? Color::WHITE : Color::BLACK;
+        }
+    }
+    return Color::WHITE; // default return
+}
+
+
+PieceType Board::getPieceType(Square square) const{
+    for(int i=0; i<12; i++){
+        if(getBit(bitboards[i], enumToInt(square))){
+            return static_cast<PieceType>(i);
+        }
+    }
+    return PieceType::WHITE_PAWN; // default return
+}
+
+
+uint64_t Board::getAllPieces(PieceType piece) const{
     return bitboards[enumToInt(piece)];
 }
 

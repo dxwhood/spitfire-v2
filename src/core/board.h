@@ -127,13 +127,17 @@ public:
 
     void printPiece(PieceType piece) const;  // Prints a bitboard for debugging
     void printBitboard(uint64_t bitboard) const;  // Prints a bitboard for debugging
-    void setPieceType(uint64_t bitboard, PieceType piece); // Sets a piece type on the board based on a bitboard
+    void setPieces(uint64_t bitboard, PieceType piece); // Sets a piece type on the board based on a bitboard
     void clearPieceType(uint64_t bitboard, PieceType piece); // Clears a piece type on the board based on a bitboard
     void setPiece(Square square, PieceType piece);  // Sets a piece on the board
     void clearPiece(Square square);  // Clears a piece on the board
     void setDefaultPosition();  // Sets the default starting position
     void setDebugPosition();  // Sets the mid game position for debugging
-    uint64_t getPieceType(PieceType piece) const;  // Returns the bitboard for a piece type
+
+    Color getPieceColor(Square square) const;  // Returns the color of a piece on a square
+    PieceType getPieceType(Square square) const;  // Returns the piece type on a square
+
+    uint64_t getAllPieces(PieceType piece) const;  // Returns the bitboard for a piece type
     uint64_t getOccupancy() const;
     uint64_t getEmpty() const;
     uint64_t getWhiteOccupancy() const;
