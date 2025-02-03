@@ -1,5 +1,7 @@
 #include "core/moves.h"  // Includes move generation logic
+#include "core/board.h"
 #include <iostream>
+#include <bit>
 
 namespace chess {
 
@@ -46,7 +48,6 @@ namespace Moves {
         return knightMask & ~occupancy;
     }
 
-
     uint64_t pawnPseudo(const Board &board, Square square){
         Color color = board.getPieceColor(square);
         Rank rank = getRank(square);
@@ -79,23 +80,35 @@ namespace Moves {
         return moves;
     }
 
-
     uint64_t rookPseudo(const Board &board, Square square){
         Color color = board.getPieceColor(square);
-        uint64_t occupancy = (color == Color::WHITE)? board.getWhiteOccupancy() : board.getBlackOccupancy();
-        return 0;
+        File file = getFile(square);
+        Rank rank = getRank(square);
+        uint64_t occupied = board.getOccupancy();
+        uint64_t friendlyOccupied = (color == Color::WHITE)? board.getWhiteOccupancy() : board.getBlackOccupancy();
+
+        return (hyp_quint(SQUARE_MASKS[enumToInt(square)], occupied, RANK_MASKS[enumToInt(rank)]) |
+               hyp_quint(SQUARE_MASKS[enumToInt(square)], occupied, FILE_MASKS[enumToInt(file)])) & ~friendlyOccupied;
+
     }
 
     uint64_t bishopPseudo(const Board &board, Square square){
         Color color = board.getPieceColor(square);
-        uint64_t occupancy = (color == Color::WHITE)? board.getWhiteOccupancy() : board.getBlackOccupancy();
-        return 0;
+        uint64_t occupied = board.getOccupancy();
+        uint64_t friendlyOccupied = (color == Color::WHITE)? board.getWhiteOccupancy() : board.getBlackOccupancy();
+
+        return (hyp_quint(SQUARE_MASKS[enumToInt(square)], occupied, DIAGONAL_MASKS[enumToInt(square)]) | 
+             hyp_quint(SQUARE_MASKS[enumToInt(square)], occupied, ANTIDIAGONAL_MASKS[enumToInt(square)])) & ~friendlyOccupied;
     }
 
     uint64_t queenPseudo(const Board &board, Square square){
-        Color color = board.getPieceColor(square);
-        uint64_t occupancy = (color == Color::WHITE)? board.getWhiteOccupancy() : board.getBlackOccupancy();
-        return 0;
+        return bishopPseudo(board, square) | rookPseudo(board, square);
+    }
+
+    // From Nihar Karve - much cleaner way of implemententing hyperbola quintessence
+    uint64_t hyp_quint(uint64_t pieceMask, uint64_t occ, uint64_t lineMask) {
+        return (((lineMask & occ) - pieceMask * 2) ^
+            reverse(reverse(lineMask & occ) - reverse(pieceMask) * 2)) & lineMask;
     }
 
 
