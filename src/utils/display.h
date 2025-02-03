@@ -17,10 +17,15 @@ namespace Display{
     const std::string RESET    = "\033[0m";
     const std::string BG_LIGHT = "\033[47m";   // White background for light squares
     const std::string BG_DARK  = "\033[100m";  // Gray background for dark squares
+
     // Highlight colors.
     const std::string BG_MOVES = "\033[43m";  // Yellow background for possible moves
-    const std::string BG_SELECTED  = "\033[44m";  // Blue background for the selected piece
-    const std::string BG_CAPTURE   = "\033[41m";  // Red for capture moves
+    const std::string BG_SELECTED  = "\033[48;5;111m"; // Blue background for the selected piece
+    const std::string BG_CAPTURE   = "\033[48;5;167m";  // Red for capture moves
+
+    // Highlighted colors with transparency effect.
+    const std::string BG_MOVES_LIGHT   = "\033[48;5;221m";  // Light yellow 
+    const std::string BG_MOVES_DARK    = "\033[48;5;178m";  // Darker yellow 
 
     // Helper Array for pieceType to String conversion
     constexpr std::array<const char*, 12> pieceNames = {

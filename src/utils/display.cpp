@@ -10,7 +10,7 @@ namespace Display{
     // highlightSquare: Square enum value for the piece to highlight.
     // movesBitboard: Bitboard of possible moves (attacks) to highlight.
     // highlight: If false, ignores highlightSquare and movesBitboard (used for overload simplicity).
-    void printBoard(const Board &board, Square highlightSquare, bool highlight){
+    void printBoard(const Board &board, Square highlightSquare, bool highlight) {
         std::cout << "Printing Full Board..." << std::endl;
 
         std::array<uint64_t, 12> bitboards = board.getBitboards();
@@ -42,23 +42,22 @@ namespace Display{
             for (int j = 0; j < 8; j++) {
                 // Compute the square index.
                 int square = i * 8 + j;
+                bool isLightSquare = ((i + j) % 2 == 0);
                 std::string bg;
 
                 if (highlight && square == highlightIndex) {
-                    bg = BG_SELECTED;  // Highlight selected piece
+                    bg = BG_SELECTED;  // Solid blue for selected piece
                 }
                 else if (highlight && getBit(movesBitboard, square)) {
                     if (getBit(occupiedSquares, square)) {
-                        bg = BG_CAPTURE;  // Highlight capture moves
+                        bg = BG_CAPTURE;  // Solid red for captures
                     }
                     else {
-                        bg = BG_MOVES;  // Highlight possible moves
+                        bg = isLightSquare ? BG_MOVES_LIGHT : BG_MOVES_DARK;  // Semi-transparent yellow for moves
                     }
-                    
                 }
                 else {
-                    bool isLightSquare = ((i + j) % 2 == 0);
-                    bg = isLightSquare ? BG_LIGHT : BG_DARK;
+                    bg = isLightSquare ? BG_LIGHT : BG_DARK;  // Default alternating board colors
                 }
 
                 std::cout << bg << " " << char_board[i][j] << " " << RESET;
@@ -67,11 +66,6 @@ namespace Display{
         }
     }
 
-
-    // Overloaded function: no highlighting; just the board.
-    void printBoard(const Board &board){
-        printBoard(board, Square::A1, false);  
-    }
 
 
     void printPiece(const Board &board, PieceType piece){
