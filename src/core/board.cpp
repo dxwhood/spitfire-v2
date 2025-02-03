@@ -16,11 +16,9 @@ void Board::clearBoard() {
     }
 }
 
-
 void Board::setPieces(uint64_t bitboard, PieceType piece){
     bitboards[enumToInt(piece)] = bitboard;
 }
-
 
 void Board::clearPieceType(uint64_t bitboard, PieceType piece){
     bitboards[enumToInt(piece)] &= ~bitboard;
@@ -58,7 +56,6 @@ Color Board::getPieceColor(Square square) const{
     return Color::WHITE; // default return
 }
 
-
 PieceType Board::getPieceType(Square square) const{
     for(int i=0; i<12; i++){
         if(getBit(bitboards[i], enumToInt(square))){
@@ -67,7 +64,6 @@ PieceType Board::getPieceType(Square square) const{
     }
     return PieceType::WHITE_PAWN; // default return
 }
-
 
 uint64_t Board::getAllPieces(PieceType piece) const{
     return bitboards[enumToInt(piece)];
