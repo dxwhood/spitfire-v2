@@ -18,6 +18,8 @@ add_executable(Spitfire-v2
     src/core/moves.cpp
     src/utils/display.h
     src/utils/display.cpp
+    src/utils/input.h
+    src/utils/input.cpp
 )
 
 # Link any required libraries (if needed)
