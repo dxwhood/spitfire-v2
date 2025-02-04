@@ -5,6 +5,10 @@ namespace chess{
 
 namespace Display{
 
+    void printBoard(const Board &board){
+        printBoard(board, Square::A1, false);
+    }
+
 
     // Overloaded function with highlighting.
     // highlightSquare: Square enum value for the piece to highlight.
