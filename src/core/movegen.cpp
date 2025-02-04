@@ -1,11 +1,11 @@
-#include "core/moves.h"  // Includes move generation logic
+#include "core/movegen.h"  // Includes move generation logic
 #include "core/board.h"
 #include <iostream>
 #include <bit>
 
 namespace chess {
 
-namespace Moves {
+namespace Movegen {
 
     uint64_t pseudoLegal(const Board &board, Square square){
         switch(board.getPieceType(square)){
@@ -36,14 +36,14 @@ namespace Moves {
     uint64_t kingPseudo(const Board &board, Square square){
 
         Color color = board.getPieceColor(square);
-        uint64_t kingMask = chess::Moves::KING_MOVES[enumToInt(square)];
+        uint64_t kingMask = KING_MOVES[enumToInt(square)];
         uint64_t occupancy = (color == Color::WHITE)? board.getWhiteOccupancy() : board.getBlackOccupancy();
         return kingMask & ~occupancy;
     }
 
     uint64_t knightPseudo(const Board &board, Square square){
         Color color = board.getPieceColor(square);
-        uint64_t knightMask = chess::Moves::KNIGHT_MOVES[enumToInt(square)];
+        uint64_t knightMask = KNIGHT_MOVES[enumToInt(square)];
         uint64_t occupancy = (color == Color::WHITE)? board.getWhiteOccupancy() : board.getBlackOccupancy();
         return knightMask & ~occupancy;
     }

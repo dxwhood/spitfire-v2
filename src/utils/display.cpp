@@ -18,7 +18,7 @@ namespace Display{
         std::cout << "Printing Full Board..." << std::endl;
 
         std::array<uint64_t, 12> bitboards = board.getBitboards();
-        uint64_t movesBitboard = Moves::pseudoLegal(board, highlightSquare);
+        uint64_t movesBitboard = Movegen::pseudoLegal(board, highlightSquare);
         
         // Create a board with empty squares as spaces.
         std::array<std::array<std::string, 8>, 8> char_board;

@@ -17,7 +17,7 @@ constexpr uint64_t reverse(uint64_t b) {
 
 namespace chess {
 
-namespace Moves{
+namespace Movegen{
 
     // Knight move bitboards
     constexpr std::array<uint64_t, 64> KNIGHT_MOVES = {

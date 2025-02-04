@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/board.h"  
-#include "core/moves.h"  
+#include "core/movegen.h"  
 #include <iostream>
 #include <array>
 #include <string>

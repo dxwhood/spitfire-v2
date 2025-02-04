@@ -14,8 +14,8 @@ add_executable(Spitfire-v2
     src/main.cpp 
     src/core/board.h
     src/core/board.cpp
-    src/core/moves.h
-    src/core/moves.cpp
+    src/core/movegen.h
+    src/core/movegen.cpp
     src/utils/display.h
     src/utils/display.cpp
     src/utils/input.h
