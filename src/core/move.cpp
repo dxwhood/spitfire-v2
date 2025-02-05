@@ -47,7 +47,7 @@ namespace chess {
     std::ostream& operator<<(std::ostream& os, const Move& move){
         std::string st = move.toUCIString();
         st += " ";
-        st += std::to_string(enumToInt(move.getMoveCode()));
+        st += MOVE_CODE_STRINGS[enumToInt(move.getMoveCode())];
         os << st;
         return os;
     }
