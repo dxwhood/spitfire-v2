@@ -39,6 +39,7 @@ public:
     // Getters
     std::array<uint64_t, 12> getBitboards() const;
     Square getEnPassantSquare() const;
+    bool getIsWhiteTurn() const;
 
 
     // Making and unmaking moves
