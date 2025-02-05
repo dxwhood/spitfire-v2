@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -5,15 +7,15 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include <cctype>
-#include "core/move.h"
+#include "core/board.h"
 
 namespace chess{
 
 namespace Input{
 
     std::string inputMove();
-    bool validateInputMove(std::string move);
-    Move parseUCIMove(std::string move);
+    bool validateInputMove(const std::string& moveString);
+    Move parseUCIMove(const Board& board, const std::string& moveString);
 
 }
 

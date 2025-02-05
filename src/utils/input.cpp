@@ -125,40 +125,59 @@ namespace Input {
         return move;
     }
 
-    bool validateInputMove(const std::string& move) {
-        if (move.length() == 4) {  // Normal move (e2e4)
-            return isValidSquare(move.substr(0, 2)) && isValidSquare(move.substr(2, 2));
+    bool validateInputMove(const std::string& moveString) {
+        if (moveString.length() == 4) {  // Normal move (e2e4)
+            return isValidSquare(moveString.substr(0, 2)) && isValidSquare(moveString.substr(2, 2));
         } 
         
-        if (move.length() == 5) {  // Promotion move (e7e8q)
-            return isValidSquare(move.substr(0, 2)) &&
-                isValidSquare(move.substr(2, 2)) &&
-                isValidPromotion(move[4]) &&
-                move[0] == move[2] &&  // Promotion must be on the same file
-                ((move[1] == '7' || move[3] == '8') ||  // Must be from rank 7 to rank 8 (white)
-                (move[1] == '2' || move[3] == '1'));    // Must be frome rank 2 to rank 1 (black)
+        if (moveString.length() == 5) {  // Promotion move (e7e8q)
+            return isValidSquare(moveString.substr(0, 2)) &&
+                isValidSquare(moveString.substr(2, 2)) &&
+                isValidPromotion(moveString[4]) &&
+                moveString[0] == moveString[2] &&  // Promotion must be on the same file
+                ((moveString[1] == '7' || moveString[3] == '8') ||  // Must be from rank 7 to rank 8 (white)
+                (moveString[1] == '2' || moveString[3] == '1'));    // Must be frome rank 2 to rank 1 (black)
         }
 
         return false; 
     }
 
     // Parses a UCI compliant move string and returns a Move object
-    Move parseUCIMove(std::string move) {
+    Move parseUCIMove(const Board& board, const std::string& moveString) {
         // Get from square
-        Square from = static_cast<Square>((move[0] - 'a') + 8 * (move[1] - '1'));
+        Square from = static_cast<Square>((moveString[0] - 'a') + 8 * (moveString[1] - '1'));
         // Get to square
-        Square to = static_cast<Square>((move[2] - 'a') + 8 * (move[3] - '1'));
+        Square to = static_cast<Square>((moveString[2] - 'a') + 8 * (moveString[3] - '1'));
 
-        // Get promotion piece (if any)
+        // Get moving piece color
+        Color color = board.getPieceColor(from);
+        uint64_t enemyOccupancy = (color == Color::WHITE) ? board.getBlackOccupancy() : board.getWhiteOccupancy();
+
+        // Set promotion bits (if any)
         uint8_t flags = 0;
-        if (move.length() == 5) {
-            switch (move[4]) {
-                case 'q': flags = static_cast<uint8_t>(MoveCode::QUEEN_PROMO); break;
-                case 'r': flags = static_cast<uint8_t>(MoveCode::ROOK_PROMO); break;
-                case 'b': flags = static_cast<uint8_t>(MoveCode::BISHOP_PROMO); break;
-                case 'n': flags = static_cast<uint8_t>(MoveCode::KNIGHT_PROMO); break;
+        if (moveString.length() == 5) {
+            switch (moveString[4]) {
+                case 'n': flags = 0b1000; break;
+                case 'b': flags = 0b1001; break;
+                case 'r': flags = 0b1010; break;
+                case 'q': flags = 0b1011; break;
             }
         }
+
+        // Set capture bit (if necessary)
+        if (getBit(enemyOccupancy, enumToInt(to))) {
+            flags |= 0b0100;
+        }
+
+        // Set as double pawn push (if necessary)
+        if (getBit(board.getAllPieces(PieceType::WHITE_PAWN), enumToInt(from)) || 
+            getBit(board.getAllPieces(PieceType::BLACK_PAWN), enumToInt(from))) {
+            if (std::abs(enumToInt(from) - enumToInt(to)) == 16) {
+                flags = 0b0001;
+            }
+        }
+
+        // No en passant for now
 
         return Move(from, to, flags);
     }
