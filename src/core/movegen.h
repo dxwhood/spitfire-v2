@@ -21,8 +21,11 @@ namespace chess {
 
 namespace Movegen{
     
+    std::vector<Move> generateValidMoves(Board &board, Color color);
+
     std::vector<Move> getPseudoMoves(const Board &board, Color color);
-    std::vector<uint64_t> getBlackPseudoMoves(const Board &board);
+
+    uint64_t colorPseudo(const Board &board, Color color); // TODO: Implement *attacks* so that pawn moves dont show up in attack checks
 
     uint64_t pseudoLegal(const Board &board, Square square);
 
@@ -37,6 +40,13 @@ namespace Movegen{
     Move buildMove(const Board &board, PieceType piece, Square from, Square to, std::optional<PieceType> promotion = std::nullopt);
 
     bool isLegal(const Board &board);
+    bool isLegalMove(Board &board, Move move);
+    bool isLegalCastle(const Board &board, Move move);
+
+    bool isCheck(const Board &board, Color color); // Check if a color is in check
+    bool isCheckmate(const Board &board, Color color);
+    bool isStalemate(const Board &board, Color color);
+    
 
 
 };

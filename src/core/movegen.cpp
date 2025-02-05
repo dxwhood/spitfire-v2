@@ -15,6 +15,17 @@ namespace chess {
 
 namespace Movegen {
 
+    std::vector<Move> generateValidMoves(Board &board, Color color){
+        std::vector<Move> allMoves;
+        std::vector<Move> pseudoMoves = getPseudoMoves(board, color);
+        for(Move move : pseudoMoves){
+            if(isLegalMove(board, move)){
+                allMoves.push_back(move);
+            }
+        }
+        return allMoves;
+    }
+
     std::vector<Move> getPseudoMoves(const Board &board, Color color){
         uint64_t occupied = board.getOccupancy(color);
         std::vector<Move> allMoves;
@@ -32,6 +43,18 @@ namespace Movegen {
             }
         }
         return allMoves;
+    }
+
+    uint64_t colorPseudo(const Board &board, Color color){
+        uint64_t occupied = board.getOccupancy(color);
+        uint64_t pseudo = 0ULL;
+        for(int i=0; i<64; i++){
+            if(getBit(occupied, i)){
+                Square square = static_cast<Square>(i);
+                pseudo |= pseudoLegal(board, square);
+            }
+        }
+        return pseudo;
     }
 
     uint64_t pseudoLegal(const Board &board, Square square){
@@ -89,6 +112,7 @@ namespace Movegen {
         uint64_t captures = (color == Color::WHITE)? W_PAWN_ATTACKS[enumToInt(square)] : B_PAWN_ATTACKS[enumToInt(square)];
         uint64_t moves = 0ULL; // initialize moves
 
+        // Double Push
         switch (color){
             using enum Color;
             case WHITE:
@@ -108,6 +132,33 @@ namespace Movegen {
 
         moves &= ~occupied_all;
         moves |= (occupied_foe & captures);
+
+        // Consider en passant 
+        if(board.getEnPassantSquare() != Square::A1){
+            switch(color){
+                using enum Color;
+                case WHITE:
+                    if(rank == Rank::RANK_5){
+                        if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 7)){
+                            moves |= (1ULL << enumToInt(square) << 7);
+                        }
+                        if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 9)){
+                            moves |= (1ULL << enumToInt(square) << 9);
+                        }
+                    }
+                    break;
+                case BLACK:
+                    if(rank == Rank::RANK_4){
+                        if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 9)){
+                            moves |= (1ULL << enumToInt(square) >> 9);
+                        }
+                        if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 7)){
+                            moves |= (1ULL << enumToInt(square) >> 7);
+                        }
+                    }
+                    break;
+            }
+        }
 
         return moves;
     }
@@ -215,6 +266,63 @@ namespace Movegen {
         return Move(from, to, flags);
     }
     
+    bool isCheck(const Board &board, Color color){
+        uint64_t king = (color == Color::WHITE)? board.getAllPieces(PieceType::WHITE_KING) : board.getAllPieces(PieceType::BLACK_KING);
+        uint64_t enemyAttacks = colorPseudo(board, (color == Color::WHITE)? Color::BLACK : Color::WHITE);
+        return (king & enemyAttacks) != 0;
+    }
+
+    bool isLegal(const Board &board){
+        return true;
+    }
+
+    bool isLegalCastle(const Board &board, Move move){
+        MoveCode code = move.getMoveCode();
+        Color color = board.getPieceColor(move.getFrom());
+        uint64_t attackedSquares = colorPseudo(board, (color == Color::WHITE)? Color::BLACK : Color::WHITE);
+        uint64_t occupancy = board.getOccupancy();
+
+        // Can't castle out of check
+        if((color == Color::WHITE && (E1_MASK & attackedSquares) != 0) || (color == Color::BLACK && (E8_MASK & attackedSquares) != 0)){
+            return false;
+        }
+
+        // Make sure the squares in between the king and rook are empty and not under attack
+        switch (code){
+            case MoveCode::KING_CASTLE:
+                if(color == Color::WHITE){
+                    return (F1G1_MASK & occupancy) == 0 && (F1G1_MASK & attackedSquares) == 0;
+                } else {
+                    return (F8G8_MASK & occupancy) == 0 && (F8G8_MASK & attackedSquares) == 0;
+                }
+                break;
+            case MoveCode::QUEEN_CASTLE:
+                if(color == Color::WHITE){
+                    return (C1D1_MASK & occupancy) == 0 && (C1D1_MASK & attackedSquares) == 0;
+                } else {
+                    return (C8D8_MASK & occupancy) == 0 && (C8D8_MASK & attackedSquares) == 0;
+                }
+                break;
+            default:
+                return false;
+            
+        }
+
+    }
+
+    bool isLegalMove(Board &board, Move move){
+        Color colorTurn = board.getIsWhiteTurn()? Color::WHITE : Color::BLACK;
+        board.makeMove(move);
+        bool isLegal = !isCheck(board, colorTurn);
+        board.unmakeMove(move);
+
+        // Extra check for castling
+        if(move.getMoveCode() == MoveCode::KING_CASTLE || move.getMoveCode() == MoveCode::QUEEN_CASTLE){
+            isLegal = isLegalCastle(board, move);
+        }
+
+        return isLegal;
+    }
 
     
 }
