@@ -42,6 +42,22 @@ namespace Movegen {
                 allMoves.insert(allMoves.end(), moves.begin(), moves.end());
             }
         }
+        // If castling rights are available for current color add castling moves to the list
+        if (color == Color::WHITE){
+            if(board.getCastlingRights()[0]){
+                allMoves.push_back(Move(Square::E1, Square::C1, 0b0010));
+            }
+            if(board.getCastlingRights()[1]){
+                allMoves.push_back(Move(Square::E1, Square::G1, 0b0011));
+            }
+        } else {
+            if(board.getCastlingRights()[2]){
+                allMoves.push_back(Move(Square::E8, Square::C8, 0b0010));
+            }
+            if(board.getCastlingRights()[3]){
+                allMoves.push_back(Move(Square::E8, Square::G8, 0b0011));
+            }
+        }
         return allMoves;
     }
 
