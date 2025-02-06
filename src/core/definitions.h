@@ -241,6 +241,17 @@ enum class Square : int {
     A8 = 56, B8, C8, D8, E8, F8, G8, H8
 };
 
+const std::array<std::string, 64> SQUARE_STRINGS = {
+    "A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1",
+    "A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2",
+    "A3", "B3", "C3", "D3", "E3", "F3", "G3", "H3",
+    "A4", "B4", "C4", "D4", "E4", "F4", "G4", "H4",
+    "A5", "B5", "C5", "D5", "E5", "F5", "G5", "H5",
+    "A6", "B6", "C6", "D6", "E6", "F6", "G6", "H6",
+    "A7", "B7", "C7", "D7", "E7", "F7", "G7", "H7",
+    "A8", "B8", "C8", "D8", "E8", "F8", "G8", "H8"
+};
+
 // File/Rank/Square conversions
 constexpr File getFile(Square square) {
     return static_cast<File>(static_cast<int>(square) % 8);
@@ -285,11 +296,12 @@ inline void clearBit(uint64_t &board, uint8_t pos){
 
 // Move codes from nibble flag
 enum class MoveCode : uint8_t {
-    QUIET, DOUBLE_PAWN_PUSH, KING_CASTLE, QUEEN_CASTLE, CAPTURE, EN_PASSANT, KNIGHT_PROMO, BISHOP_PROMO, ROOK_PROMO, QUEEN_PROMO, KNIGHT_PROMO_CAPTURE, BISHOP_PROMO_CAPTURE, ROOK_PROMO_CAPTURE, QUEEN_PROMO_CAPTURE
+    QUIET = 0, DOUBLE_PAWN_PUSH, KING_CASTLE, QUEEN_CASTLE, CAPTURE, EN_PASSANT, 
+    KNIGHT_PROMO = 8, BISHOP_PROMO, ROOK_PROMO, QUEEN_PROMO, KNIGHT_PROMO_CAPTURE, BISHOP_PROMO_CAPTURE, ROOK_PROMO_CAPTURE, QUEEN_PROMO_CAPTURE
 };
 
-const std::array<std::string, 14> MOVE_CODE_STRINGS = {
-    "QUIET", "DOUBLE_PAWN_PUSH", "KING_CASTLE", "QUEEN_CASTLE", "CAPTURE", "EN_PASSANT", "KNIGHT_PROMO", "BISHOP_PROMO", "ROOK_PROMO", "QUEEN_PROMO", "KNIGHT_PROMO_CAPTURE", "BISHOP_PROMO_CAPTURE", "ROOK_PROMO_CAPTURE", "QUEEN_PROMO_CAPTURE"
+const std::array<std::string, 16> MOVE_CODE_STRINGS = {
+    "QUIET", "DOUBLE_PAWN_PUSH", "KING_CASTLE", "QUEEN_CASTLE", "CAPTURE", "EN_PASSANT", "CODE 6", "CODE 7?" "KNIGHT_PROMO", "BISHOP_PROMO", "ROOK_PROMO", "QUEEN_PROMO", "KNIGHT_PROMO_CAPTURE", "BISHOP_PROMO_CAPTURE", "ROOK_PROMO_CAPTURE", "QUEEN_PROMO_CAPTURE"
 };
 
 struct MoveState {
