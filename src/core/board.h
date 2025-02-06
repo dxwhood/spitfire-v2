@@ -38,6 +38,7 @@ public:
 
     // Getters
     std::array<uint64_t, 12> getBitboards() const;
+    uint64_t getBitboard(PieceType piece) const;
     Square getEnPassantSquare() const;
     bool getIsWhiteTurn() const;
 

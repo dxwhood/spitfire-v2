@@ -62,7 +62,8 @@ void Board::clearPiece(Square square){
 void Board::movePiece(Square from, Square to){
     std::optional<PieceType> pieceOpt = getPieceType(from);
     if (!pieceOpt.has_value()) {
-        std::cout << "Error: no piece on square" << std::endl;
+        std::cout << "Error (movePiece): no piece on square " << SQUARE_STRINGS[enumToInt(from)] << std::endl;
+        //std::cout << "DEBUG: from" << enumToInt(from) << " | to"  << enumToInt(to) << std::endl;
         return;
     }
     PieceType piece = pieceOpt.value();
@@ -137,14 +138,25 @@ std::array<uint64_t, 12> Board::getBitboards() const{
     return bitboards;
 }
 
+uint64_t Board::getBitboard(PieceType piece) const{
+    return bitboards[enumToInt(piece)];
+}
+
 Square Board::getEnPassantSquare() const{
     return enPassantSquare;
+}
+
+bool Board::getIsWhiteTurn() const{
+    return isWhiteTurn;
 }
 
 void Board::makeMove(Move move){
     std::optional<PieceType> pieceOpt = getPieceType(move.getFrom());
     if (!pieceOpt.has_value()) {
-        std::cout << "Error: no piece on square" << std::endl;
+        std::cout << "Error (makeMove): no piece on square " << SQUARE_STRINGS[enumToInt(move.getFrom())] << std::endl;
+        // std::cout << "DEBUG2: from" << enumToInt(move.getFrom()) << " | to"  << enumToInt(move.getTo()) << std::endl;
+        std::cout << move << std::endl;
+
         return;
     }
     PieceType piece = pieceOpt.value();
