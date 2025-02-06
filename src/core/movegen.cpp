@@ -245,7 +245,7 @@ namespace Movegen {
 
         // Check if a pawn is making an en passant move
         if(piece == PieceType::WHITE_PAWN || piece == PieceType::BLACK_PAWN){
-            if(board.getPieceType(to).has_value() && board.getPieceType(to).value() == PieceType::WHITE_PAWN){
+            if(board.getEnPassantSquare() != Square::A1 && to == board.getEnPassantSquare()){
                 flags = 0b0101;
             }
         }
