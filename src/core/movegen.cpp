@@ -237,9 +237,8 @@ namespace Movegen {
 
         // Check if a pawn is making a double push
         if((piece == PieceType::WHITE_PAWN || piece == PieceType::BLACK_PAWN) && !promotion.has_value()){
-            // Check if going to en passant square
-            if(to == board.getEnPassantSquare()){
-                flags = 0b0101;
+            if(std::abs(enumToInt(from) - enumToInt(to)) == 16){
+                flags = 0b0001;
             }
         }
 
