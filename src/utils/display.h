@@ -47,7 +47,8 @@ namespace Display{
 
 
     void printBoard(const Board &board);  // Prints the board for debugging
-    void printBoard(const Board &board, Square highlightSquare, bool highlight = true);
+    void printBoard(const Board &board, Square highlightSquare, bool highlight = true, std::optional <Move> prevMove=std::nullopt);  // Prints the board with possible moves highlighted
+    void printBoard(const Board &board, std::optional <Move> prevMove);
     void printPiece(const Board &board, PieceType piece);  // Prints a bitboard for debugging
     void highlightPiece(const Board &board, PieceType piece); // Highlights a piece type on the board
     void printBitboard(uint64_t bitboard);  // Prints a bitboard for debugging

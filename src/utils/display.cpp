@@ -9,13 +9,20 @@ namespace Display{
         printBoard(board, Square::A1, false);
     }
 
+    void printBoard(const Board &board, std::optional<Move> prevMove){
+        printBoard(board, Square::A1, false, prevMove);
+    }   
+
 
     // Overloaded function with highlighting.
     // highlightSquare: Square enum value for the piece to highlight.
     // movesBitboard: Bitboard of possible moves (attacks) to highlight.
     // highlight: If false, ignores highlightSquare and movesBitboard (used for overload simplicity).
-    void printBoard(const Board &board, Square highlightSquare, bool highlight) {
-        std::cout << "Printing Full Board..." << std::endl;
+    void printBoard(const Board &board, Square highlightSquare, bool highlight, std::optional <Move> prevMove){ 
+        Square from = prevMove.has_value() ? prevMove.value().getFrom() : Square::A1;
+        Square to = prevMove.has_value() ? prevMove.value().getTo() : Square::A1;
+        
+        std::cout << std::endl;
 
         std::array<uint64_t, 12> bitboards = board.getBitboards();
         uint64_t movesBitboard = Movegen::pseudoLegal(board, highlightSquare);
@@ -59,6 +66,12 @@ namespace Display{
                     else {
                         bg = isLightSquare ? BG_MOVES_LIGHT : BG_MOVES_DARK;  // Semi-transparent yellow for moves
                     }
+                }
+                else if (prevMove.has_value() && square == enumToInt(from)) { // Highlight the previous move
+                    bg = isLightSquare ? BG_MOVES_LIGHT : BG_MOVES_DARK; 
+                }
+                else if (prevMove.has_value() && square == enumToInt(to)) { // Highlight the previous move
+                    bg = isLightSquare ? BG_MOVES_LIGHT : BG_MOVES_DARK; 
                 }
                 else {
                     bg = isLightSquare ? BG_LIGHT : BG_DARK;  // Default alternating board colors
