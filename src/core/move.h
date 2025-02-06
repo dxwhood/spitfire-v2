@@ -31,6 +31,8 @@ class Move{
         std::string toUCIString() const;
 
         friend std::ostream& operator<<(std::ostream& os, const Move& move);
+
+        friend bool operator==(const Move& lhs, const Move& rhs);
     
     private:
         uint16_t moveData;

@@ -52,4 +52,8 @@ namespace chess {
         return os;
     }
 
+    bool operator==(const Move& lhs, const Move& rhs){
+        return lhs.moveData == rhs.moveData;
+    }
+
 }
