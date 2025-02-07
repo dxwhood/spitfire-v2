@@ -177,7 +177,20 @@ namespace Input {
             }
         }
 
-        // No en passant for now
+        // Check if castling 
+        if (board.getPieceType(from) == PieceType::WHITE_KING){
+            if (from == Square::E1 && to == Square::G1){
+                flags = 0b0010;
+            } else if (from == Square::E1 && to == Square::C1){
+                flags = 0b0011;
+            }
+        } else if (board.getPieceType(from) == PieceType::BLACK_KING){
+            if (from == Square::E8 && to == Square::G8){
+                flags = 0b0010;
+            } else if (from == Square::E8 && to == Square::C8){
+                flags = 0b0011;
+            }
+        }
 
         return Move(from, to, flags);
     }
