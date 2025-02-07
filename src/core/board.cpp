@@ -48,6 +48,120 @@ void Board::setDebugPosition(){
     }
 }
 
+// Had o3-mini-high do it to save time. Seems to work fine for now but will need testing/rewriting.
+void Board::fenToBoard(std::string fen) {
+    // Clear current board state.
+    clearBoard();
+
+    // Use an istringstream to split the FEN string into its components.
+    std::istringstream fenStream(fen);
+    std::string boardPart, activeColor, castling, enPassant;
+    int halfmove, fullmove;
+    fenStream >> boardPart >> activeColor >> castling >> enPassant >> halfmove >> fullmove;
+
+    // Process the board layout.
+    // The board layout consists of 8 rank strings separated by '/'
+    std::istringstream boardStream(boardPart);
+    std::string rankStr;
+    // FEN describes ranks from 8 down to 1.
+    for (int rank = 8; rank >= 1; --rank) {
+        if (!std::getline(boardStream, rankStr, '/')) {
+            std::cerr << "Invalid FEN: not enough ranks." << std::endl;
+            return;
+        }
+        int file = 0;
+        for (char ch : rankStr) {
+            if (std::isdigit(ch)) {
+                // Empty squares; advance file index by the digit value.
+                file += ch - '0';
+            } else {
+                // Map the FEN piece character to the corresponding PieceType.
+                PieceType piece;
+                switch(ch) {
+                    case 'P': piece = PieceType::WHITE_PAWN; break;
+                    case 'N': piece = PieceType::WHITE_KNIGHT; break;
+                    case 'B': piece = PieceType::WHITE_BISHOP; break;
+                    case 'R': piece = PieceType::WHITE_ROOK; break;
+                    case 'Q': piece = PieceType::WHITE_QUEEN; break;
+                    case 'K': piece = PieceType::WHITE_KING; break;
+                    case 'p': piece = PieceType::BLACK_PAWN; break;
+                    case 'n': piece = PieceType::BLACK_KNIGHT; break;
+                    case 'b': piece = PieceType::BLACK_BISHOP; break;
+                    case 'r': piece = PieceType::BLACK_ROOK; break;
+                    case 'q': piece = PieceType::BLACK_QUEEN; break;
+                    case 'k': piece = PieceType::BLACK_KING; break;
+                    default:
+                        std::cerr << "Invalid piece character in FEN: " << ch << std::endl;
+                        continue;
+                }
+                // Calculate the square index.
+                // Our Square enum maps A1 to index 0 up to H8 = 63.
+                // Given rank (8 to 1) and file (0 to 7), the index is:
+                // (rank - 1) * 8 + file.
+                Square sq = static_cast<Square>((rank - 1) * 8 + file);
+                setPiece(piece, sq);
+                ++file;
+            }
+        }
+    }
+
+    // Set the active color.
+    isWhiteTurn = (activeColor == "w");
+
+    // Process castling rights.
+    // Order: white kingside, white queenside, black kingside, black queenside.
+    castlingRights = {false, false, false, false};
+    if (castling != "-") {
+        for (char c : castling) {
+            switch(c) {
+                case 'K': castlingRights[0] = true; break;
+                case 'Q': castlingRights[1] = true; break;
+                case 'k': castlingRights[2] = true; break;
+                case 'q': castlingRights[3] = true; break;
+                default: break;
+            }
+        }
+    }
+
+    // Process en passant square.
+    if (enPassant == "-" || enPassant.size() < 2) {
+        // Use a sentinel value (here -1 cast to Square) to denote no en passant square.
+        enPassantSquare = static_cast<Square>(-1);
+    } else {
+        // Convert the file (a-h) and rank (1-8) from algebraic notation.
+        int file = enPassant[0] - 'a';
+        int rankDigit = enPassant[1] - '0'; // converts char digit to int
+        enPassantSquare = static_cast<Square>((rankDigit - 1) * 8 + file);
+    }
+
+    // Set the halfmove clock.
+    halfmoveClock = static_cast<uint8_t>(halfmove);
+}
+
+PieceType Board::fenCharToPiece(char c){
+    switch(c){
+        case 'P': return PieceType::WHITE_PAWN;
+        case 'N': return PieceType::WHITE_KNIGHT;
+        case 'B': return PieceType::WHITE_BISHOP;
+        case 'R': return PieceType::WHITE_ROOK;
+        case 'Q': return PieceType::WHITE_QUEEN;
+        case 'K': return PieceType::WHITE_KING;
+        case 'p': return PieceType::BLACK_PAWN;
+        case 'n': return PieceType::BLACK_KNIGHT;
+        case 'b': return PieceType::BLACK_BISHOP;
+        case 'r': return PieceType::BLACK_ROOK;
+        case 'q': return PieceType::BLACK_QUEEN;
+        case 'k': return PieceType::BLACK_KING;
+        default: return PieceType::WHITE_PAWN; // default return
+    }
+}
+
+Square Board::strToSquare(std::string square){
+    int file = square[0] - 'a';
+    int rank = square[1] - '1';
+    return static_cast<Square>(file + 8 * rank);
+}
+
 void Board::setPiece(PieceType piece, Square square){
     setBit(bitboards[enumToInt(piece)], enumToInt(square));
 }

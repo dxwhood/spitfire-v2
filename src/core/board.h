@@ -8,6 +8,8 @@
 #include <stack>
 #include "definitions.h"
 #include "move.h"
+#include <sstream>
+#include <cctype>
 
 namespace chess {
 
@@ -19,7 +21,8 @@ public:
     void setPieces(uint64_t bitboard, PieceType piece); // Sets a piece type on the board based on a bitboard
     void clearPieceType(uint64_t bitboard, PieceType piece); // Clears a piece type on the board based on a bitboard
     void setDebugPosition();  // Sets the mid game position for debugging
-   
+    void fenToBoard(std::string fen);  // Sets the board based on a FEN string
+
     // Game related functions
     void setDefaultPosition();  // Sets the default starting position
     void setPiece(PieceType piece, Square square);  // Sets a piece on the board
@@ -60,4 +63,4 @@ private:
 
 
 
-}  // namespace chess
+} 
