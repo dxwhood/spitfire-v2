@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <optional>
+#include <string>
 
 // File bitboards
 constexpr uint64_t A_FILE = 0x0101010101010101ULL;
