@@ -25,7 +25,7 @@ namespace Movegen{
 
     std::vector<Move> getPseudoMoves(const Board &board, Color color);
 
-    uint64_t colorPseudo(const Board &board, Color color); // TODO: Implement *attacks* so that pawn moves dont show up in attack checks
+    uint64_t colorPseudo(const Board &board, Color color); // TODO: Implement *attacks* so that pawn moves dont show up in attack checks?
 
     uint64_t pseudoLegal(const Board &board, Square square);
 
@@ -47,6 +47,10 @@ namespace Movegen{
     bool isCheckmate(const Board &board, Color color);
     bool isStalemate(const Board &board, Color color);
     
+
+    uint64_t perft(Board &board, int depth);
+    
+
 
 
 };

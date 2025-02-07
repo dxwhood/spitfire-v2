@@ -343,6 +343,21 @@ namespace Movegen {
     }
 
     
+    uint64_t perft(Board &board, int depth){
+        if(depth == 0){
+            return 1;
+        }
+        uint64_t nodes = 0;
+        std::vector<Move> moves = generateValidMoves(board, board.getIsWhiteTurn()? Color::WHITE : Color::BLACK);
+        for(Move move : moves){
+            board.makeMove(move);
+            nodes += perft(board, depth - 1);
+            board.unmakeMove(move);
+        }
+        return nodes;
+    }    
+
+
 }
 
 }
