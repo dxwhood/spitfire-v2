@@ -316,25 +316,44 @@ void Board::unmakeMove(Move move){
         setPiece(state.capturedPiece.value(), move.getTo());
     }
 
-    // // Handle castling
-    // MoveCode code = move.getMoveCode();
-    // if (code == MoveCode::KING_CASTLE) {
-    //     if (getPieceColor(move.getFrom()) == Color::WHITE) {
-    //         movePiece(Square::G1, Square::E1);
-    //         movePiece(Square::F1, Square::H1);
-    //     } else {
-    //         movePiece(Square::G8, Square::E8);
-    //         movePiece(Square::F8, Square::H8);
-    //     }
-    // } else if (code == MoveCode::QUEEN_CASTLE) {
-    //     if (getPieceColor(move.getFrom()) == Color::WHITE) {
-    //         movePiece(Square::C1, Square::E1);
-    //         movePiece(Square::D1, Square::A1);
-    //     } else {
-    //         movePiece(Square::C8, Square::E8);
-    //         movePiece(Square::D8, Square::A8);
-    //     }
-    // }
+    // Handle castling
+    MoveCode code = move.getMoveCode();
+    if (code == MoveCode::KING_CASTLE) {
+        if (getPieceColor(move.getFrom()) == Color::WHITE) {
+            clearPiece(Square::G1);
+            clearPiece(Square::F1);
+            setPiece(PieceType::WHITE_KING, Square::E1);
+            setPiece(PieceType::WHITE_ROOK, Square::H1);
+        } else {
+            clearPiece(Square::G8);
+            clearPiece(Square::F8);
+            setPiece(PieceType::BLACK_KING, Square::E8);
+            setPiece(PieceType::BLACK_ROOK, Square::H8);
+
+        }
+    } else if (code == MoveCode::QUEEN_CASTLE) {
+        if (getPieceColor(move.getFrom()) == Color::WHITE) {
+            clearPiece(Square::C1);
+            clearPiece(Square::D1);
+            setPiece(PieceType::WHITE_KING, Square::E1);
+            setPiece(PieceType::WHITE_ROOK, Square::A1);
+
+        } else {
+            clearPiece(Square::C8);
+            clearPiece(Square::D8);
+            setPiece(PieceType::BLACK_KING, Square::E8);
+            setPiece(PieceType::BLACK_ROOK, Square::A8);
+        }
+    }
+
+    // Handle en passant (add the captured pawn back)
+    if (code == MoveCode::EN_PASSANT) {
+        if (getPieceColor(move.getFrom()) == Color::WHITE) {
+            setPiece(PieceType::BLACK_PAWN, static_cast<Square>(enumToInt(move.getTo()) - 8));
+        } else {
+            setPiece(PieceType::WHITE_PAWN, static_cast<Square>(enumToInt(move.getTo()) + 8));
+        }
+    }
 
     // Switch turns
     isWhiteTurn = !isWhiteTurn;
