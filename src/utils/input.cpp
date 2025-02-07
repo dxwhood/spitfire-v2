@@ -192,6 +192,13 @@ namespace Input {
             }
         }
 
+        // Check if en passant
+        if (board.getPieceType(from) == PieceType::WHITE_PAWN || board.getPieceType(from) == PieceType::BLACK_PAWN){
+            if (board.getEnPassantSquare() != Square::A1 && to == board.getEnPassantSquare()){
+                flags = 0b0101;
+            }
+        }
+
         return Move(from, to, flags);
     }
 
