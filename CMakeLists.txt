@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD 23)
 include_directories(${CMAKE_SOURCE_DIR}/src)      
 include_directories(${CMAKE_SOURCE_DIR}/src/core) 
 include_directories(${CMAKE_SOURCE_DIR}/src/utils) 
+include_directories(${CMAKE_SOURCE_DIR}/tests)
 
 
 # Source files
@@ -25,6 +26,8 @@ add_executable(Spitfire-v2
     src/utils/display.cpp
     src/utils/input.h
     src/utils/input.cpp
+    tests/test_movegen.h
+    tests/test_movegen.cpp
 )
 
 # Link any required libraries (if needed)
