@@ -12,16 +12,13 @@ class Game {
     public:
         Game();
         void start(bool playerWhite);
-        void playMove(Move move);
-
+        
         // getters
         Board getBoard() const { return board; }
-        bool getIsWhiteTurn() const { return isWhiteTurn; }
-
+        Board board;
 
     private:
-        Board board;
-        bool isWhiteTurn;
+        
 
 
 

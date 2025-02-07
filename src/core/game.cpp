@@ -3,78 +3,71 @@
 namespace chess {
 
 
-Game::Game() : isWhiteTurn(true) {
+Game::Game() {
     board.setDefaultPosition();
 }
 
 void Game::start(bool playerWhite) {
     Move parsedMove;
-    while (true) {
-        Display::printBoard(board);
-        std::string move = Input::inputMove();
-        while (!Input::validateInputMove(move)) {
-            std::cout << "Invalid move. Please try again." << std::endl;
-            move = Input::inputMove();
-        }
-        parsedMove = Input::parseUCIMove(board, move);
+    Move prevMove;
+    Display::printBoard(board);
+    bool loop = true;
 
-        if (isWhiteTurn && board.getPieceColor(parsedMove.getFrom()) == Color::WHITE) {
-            playMove(parsedMove);
-            isWhiteTurn = !isWhiteTurn;
-        } else if (!isWhiteTurn && board.getPieceColor(parsedMove.getFrom()) == Color::BLACK) {
-            playMove(parsedMove);
-            isWhiteTurn = !isWhiteTurn;
+    // Rewrite of the game loop
+    while(true){
+        if(board.getIsWhiteTurn() == playerWhite){
+            std::vector<Move> playerMoves = Movegen::generateValidMoves(board, playerWhite? Color::WHITE : Color::BLACK);
+            if (playerMoves.size() == 0) {
+                // check for stalemate by checking if in check
+                if (Movegen::isCheck(board, playerWhite? Color::WHITE : Color::BLACK)) {
+                    std::cout << "Checkmate! You win!" << std::endl;
+                } else {
+                    std::cout << "Stalemate! It's a draw!" << std::endl;
+                }
+                // exit the game loop
+                loop = false;
+                break;
+            }
+
+            parsedMove = Input::parseUCIMove(board, Input::inputMove());
+            while(std::find(playerMoves.begin(), playerMoves.end(), parsedMove) == playerMoves.end()){
+                std::cout << "Illegal move. Please try again." << std::endl;
+                std::cout << parsedMove << std::endl;
+                parsedMove = Input::parseUCIMove(board, Input::inputMove());
+            }
+            board.makeMove(parsedMove);
+            prevMove = parsedMove;
         } else {
-            std::cout << "Error: wrong color. Try again" << std::endl;
+            std::vector<Move> engineMoves = Movegen::generateValidMoves(board, playerWhite? Color::BLACK : Color::WHITE);
+            if(engineMoves.size() == 0){
+                // check for stalemate by checking if in check
+                if(Movegen::isCheck(board, Color::BLACK)){
+                    std::cout << "Checkmate! You win!" << std::endl;
+                } else {
+                    std::cout << "Stalemate! It's a draw!" << std::endl;
+                }
+                // exit the game loop
+                loop = false;
+                break;
+            }
+
+            // Random move for now
+            Move engineMove = engineMoves[rand() % engineMoves.size()];
+            board.makeMove(engineMove);
+            // print engine move
+            std::cout << "Engine move: " << engineMove.toUCIString() << std::endl;
+
+            prevMove = engineMove;
+        }
+
+        if (loop) {
+            Display::printBoard(board, prevMove);
         }
     }
+
+
 }
 
-
-void Game::playMove(Move move) {
-    MoveCode code = move.getMoveCode();
-    Square from = move.getFrom();
-    Square to = move.getTo();
-    std::optional<PieceType> pieceOpt = board.getPieceType(from);
-    if (!pieceOpt.has_value()) {
-        std::cout << "Error: no piece on square" << std::endl;
-        return;
-    }
-    PieceType piece = pieceOpt.value();
-
-    switch (code) {
-        case MoveCode::QUIET:
-        case MoveCode::DOUBLE_PAWN_PUSH:
-            board.setPiece(piece, to);
-            board.clearPiece(from);
-            break;
-        case MoveCode::KING_CASTLE:
-            break;
-        case MoveCode::QUEEN_CASTLE:
-            break;
-        case MoveCode::CAPTURE:
-            board.clearPiece(to);
-            board.setPiece(piece, to);
-            break;
-        case MoveCode::EN_PASSANT:
-            break;
-        case MoveCode::KNIGHT_PROMO:
-            break;
-        case MoveCode::BISHOP_PROMO:
-            break;
-        case MoveCode::ROOK_PROMO:
-            break;
-        case MoveCode::QUEEN_PROMO:
-            break;
-        case MoveCode::KNIGHT_PROMO_CAPTURE:
-            break;
-        case MoveCode::BISHOP_PROMO_CAPTURE:
-            break;
-        case MoveCode::ROOK_PROMO_CAPTURE:
-            break;
-        case MoveCode::QUEEN_PROMO_CAPTURE:
-            break;
-    }
     
 
 
@@ -85,4 +78,3 @@ void Game::playMove(Move move) {
 
 
 
-}
