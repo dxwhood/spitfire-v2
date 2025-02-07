@@ -39,9 +39,10 @@ public:
     // Getters
     std::array<uint64_t, 12> getBitboards() const;
     uint64_t getBitboard(PieceType piece) const;
+
     Square getEnPassantSquare() const;
     bool getIsWhiteTurn() const;
-
+    std::array<bool, 4> getCastlingRights() const;
 
     // Making and unmaking moves
     void makeMove(Move move);

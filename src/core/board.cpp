@@ -146,6 +146,10 @@ Square Board::getEnPassantSquare() const{
     return enPassantSquare;
 }
 
+std::array<bool, 4> Board::getCastlingRights() const{
+    return castlingRights;
+}
+
 bool Board::getIsWhiteTurn() const{
     return isWhiteTurn;
 }
@@ -311,6 +315,26 @@ void Board::unmakeMove(Move move){
     if (state.capturedPiece.has_value()) {
         setPiece(state.capturedPiece.value(), move.getTo());
     }
+
+    // // Handle castling
+    // MoveCode code = move.getMoveCode();
+    // if (code == MoveCode::KING_CASTLE) {
+    //     if (getPieceColor(move.getFrom()) == Color::WHITE) {
+    //         movePiece(Square::G1, Square::E1);
+    //         movePiece(Square::F1, Square::H1);
+    //     } else {
+    //         movePiece(Square::G8, Square::E8);
+    //         movePiece(Square::F8, Square::H8);
+    //     }
+    // } else if (code == MoveCode::QUEEN_CASTLE) {
+    //     if (getPieceColor(move.getFrom()) == Color::WHITE) {
+    //         movePiece(Square::C1, Square::E1);
+    //         movePiece(Square::D1, Square::A1);
+    //     } else {
+    //         movePiece(Square::C8, Square::E8);
+    //         movePiece(Square::D8, Square::A8);
+    //     }
+    // }
 
     // Switch turns
     isWhiteTurn = !isWhiteTurn;
