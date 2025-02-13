@@ -44,8 +44,7 @@ namespace Movegen{
     bool isLegalCastle(const Board &board, Move move);
 
     bool isCheck(const Board &board, Color color); // Check if a color is in check
-    bool isCheckmate(const Board &board, Color color);
-    bool isStalemate(const Board &board, Color color);
+
     
 
     uint64_t perft(Board &board, int depth);
