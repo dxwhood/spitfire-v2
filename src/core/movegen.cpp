@@ -305,22 +305,39 @@ namespace Movegen {
         // Make sure the squares in between the king and rook are empty and not under attack
         switch (code){
             case MoveCode::KING_CASTLE:
-                if(color == Color::WHITE){
-                    return (F1G1_MASK & occupancy) == 0 && (F1G1_MASK & attackedSquares) == 0;
-                } else {
-                    return (F8G8_MASK & occupancy) == 0 && (F8G8_MASK & attackedSquares) == 0;
+                if(color == Color::WHITE && !((F1G1_MASK & occupancy) == 0 && (F1G1_MASK & attackedSquares) == 0)){
+                    return false;
+                } 
+                else if(color == Color::BLACK && !((F8G8_MASK & occupancy) == 0 && (F8G8_MASK & attackedSquares) == 0)){
+                    return false;
                 }
                 break;
             case MoveCode::QUEEN_CASTLE:
-                if(color == Color::WHITE){
-                    return (C1D1_MASK & occupancy) == 0 && (C1D1_MASK & attackedSquares) == 0;
-                } else {
-                    return (C8D8_MASK & occupancy) == 0 && (C8D8_MASK & attackedSquares) == 0;
+                if(color == Color::WHITE && !((C1D1_MASK & occupancy) == 0 && (C1D1_MASK & attackedSquares) == 0)){
+                    return false;
+                } 
+                else if (color == Color::BLACK && !((C8D8_MASK & occupancy) == 0 && (C8D8_MASK & attackedSquares) == 0)){
+                    return false;
                 }
                 break;
             default:
-                return false;
             
+        }
+
+        // Last check:
+        // Make sure rooks are in fact in the correct position
+        if(color == Color::WHITE){
+            if(code == MoveCode::KING_CASTLE){
+                return (board.getAllPieces(PieceType::WHITE_ROOK) & H1_MASK) != 0;
+            } else {
+                return (board.getAllPieces(PieceType::WHITE_ROOK) & A1_MASK) != 0;
+            }
+        } else {
+            if(code == MoveCode::KING_CASTLE){
+                return (board.getAllPieces(PieceType::BLACK_ROOK) & H8_MASK) != 0;
+            } else {
+                return (board.getAllPieces(PieceType::BLACK_ROOK) & A8_MASK) != 0;
+            }
         }
 
     }
@@ -333,7 +350,6 @@ namespace Movegen {
             }
         }
 
-    
         Color colorTurn = board.getIsWhiteTurn()? Color::WHITE : Color::BLACK;
         board.makeMove(move);
         bool isLegal = !isCheck(board, colorTurn);
@@ -342,7 +358,7 @@ namespace Movegen {
         return isLegal;
     }
 
-    
+
     uint64_t perft(Board &board, int depth){
         if(depth == 0){
             return 1;

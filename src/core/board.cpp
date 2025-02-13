@@ -138,30 +138,6 @@ void Board::fenToBoard(std::string fen) {
     halfmoveClock = static_cast<uint8_t>(halfmove);
 }
 
-PieceType Board::fenCharToPiece(char c){
-    switch(c){
-        case 'P': return PieceType::WHITE_PAWN;
-        case 'N': return PieceType::WHITE_KNIGHT;
-        case 'B': return PieceType::WHITE_BISHOP;
-        case 'R': return PieceType::WHITE_ROOK;
-        case 'Q': return PieceType::WHITE_QUEEN;
-        case 'K': return PieceType::WHITE_KING;
-        case 'p': return PieceType::BLACK_PAWN;
-        case 'n': return PieceType::BLACK_KNIGHT;
-        case 'b': return PieceType::BLACK_BISHOP;
-        case 'r': return PieceType::BLACK_ROOK;
-        case 'q': return PieceType::BLACK_QUEEN;
-        case 'k': return PieceType::BLACK_KING;
-        default: return PieceType::WHITE_PAWN; // default return
-    }
-}
-
-Square Board::strToSquare(std::string square){
-    int file = square[0] - 'a';
-    int rank = square[1] - '1';
-    return static_cast<Square>(file + 8 * rank);
-}
-
 void Board::setPiece(PieceType piece, Square square){
     setBit(bitboards[enumToInt(piece)], enumToInt(square));
 }
@@ -388,15 +364,15 @@ void Board::makeMove(Move move){
         castlingRights[3] = false;
     } else if (piece == PieceType::WHITE_ROOK) {
         if (from == Square::A1) {
-            castlingRights[0] = false;
-        } else if (from == Square::H1) {
             castlingRights[1] = false;
+        } else if (from == Square::H1) {
+            castlingRights[0] = false;
         }
     } else if (piece == PieceType::BLACK_ROOK) {
         if (from == Square::A8) {
-            castlingRights[2] = false;
-        } else if (from == Square::H8) {
             castlingRights[3] = false;
+        } else if (from == Square::H8) {
+            castlingRights[2] = false;
         }
     }
 
@@ -424,6 +400,13 @@ void Board::unmakeMove(Move move){
 
     // Move the piece back
     movePiece(move.getTo(), move.getFrom());
+
+    // Handle reverse promotions
+    if (move.isPromotion()) {
+        Color color = getPieceColor(move.getFrom());
+        clearPiece(move.getFrom());
+        setPiece((color == Color::WHITE)? PieceType::WHITE_PAWN : PieceType::BLACK_PAWN, move.getFrom());
+    }
     
     // Restore the captured piece
     if (state.capturedPiece.has_value()) {
