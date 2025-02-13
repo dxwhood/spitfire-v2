@@ -212,10 +212,15 @@ constexpr std::array<uint64_t, 64> B_PAWN_ATTACKS = {
 // Castle Masks
 constexpr uint64_t E1_MASK = 0x0000000000000010ULL;
 constexpr uint64_t E8_MASK = 0x1000000000000000ULL;
+constexpr uint64_t A1_MASK = 0x0000000000000001ULL;
+constexpr uint64_t A8_MASK = 0x0100000000000000ULL;
+constexpr uint64_t H1_MASK = 0x0000000000000080ULL;
+constexpr uint64_t H8_MASK = 0x8000000000000000ULL;
 constexpr uint64_t F1G1_MASK = 0x0000000000000060ULL;
 constexpr uint64_t C1D1_MASK = 0x000000000000000CULL;
 constexpr uint64_t F8G8_MASK = 0x6000000000000000ULL;
 constexpr uint64_t C8D8_MASK = 0x0C00000000000000ULL;
+
 
 
 
@@ -272,6 +277,12 @@ enum class PieceType : int {
     BLACK_PAWN, BLACK_KNIGHT, BLACK_BISHOP, BLACK_ROOK, BLACK_QUEEN, BLACK_KING
 };
 
+// Helper Array for pieceType to String conversion
+constexpr std::array<const char*, 12> pieceNames = {
+    "White Pawn", "White Knight", "White Bishop", "White Rook", "White Queen", "White King",
+    "Black Pawn", "Black Knight", "Black Bishop", "Black Rook", "Black Queen", "Black King"
+};
+
 // Colors
 enum class Color : int {
     WHITE, BLACK
@@ -302,7 +313,7 @@ enum class MoveCode : uint8_t {
 };
 
 const std::array<std::string, 16> MOVE_CODE_STRINGS = {
-    "QUIET", "DOUBLE_PAWN_PUSH", "KING_CASTLE", "QUEEN_CASTLE", "CAPTURE", "EN_PASSANT", "CODE 6", "CODE 7?" "KNIGHT_PROMO", "BISHOP_PROMO", "ROOK_PROMO", "QUEEN_PROMO", "KNIGHT_PROMO_CAPTURE", "BISHOP_PROMO_CAPTURE", "ROOK_PROMO_CAPTURE", "QUEEN_PROMO_CAPTURE"
+    "QUIET", "DOUBLE_PAWN_PUSH", "KING_CASTLE", "QUEEN_CASTLE", "CAPTURE", "EN_PASSANT", "CODE 6", "CODE 7?", "KNIGHT_PROMO", "BISHOP_PROMO", "ROOK_PROMO", "QUEEN_PROMO", "KNIGHT_PROMO_CAPTURE", "BISHOP_PROMO_CAPTURE", "ROOK_PROMO_CAPTURE", "QUEEN_PROMO_CAPTURE"
 };
 
 struct MoveState {
