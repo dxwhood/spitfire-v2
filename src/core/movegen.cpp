@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <iomanip> // for formatting output
+#include "utils/display.h"
 
 namespace{
     // From Nihar Karve - much cleaner way of implemententing hyperbola quintessence
@@ -64,19 +65,19 @@ namespace Movegen {
         return allMoves;
     }
 
-    uint64_t colorPseudo(const Board &board, Color color){
+    uint64_t colorPseudo(const Board &board, Color color, bool attacks){
         uint64_t occupied = board.getOccupancy(color);
         uint64_t pseudo = 0ULL;
         for(int i=0; i<64; i++){
             if(getBit(occupied, i)){
                 Square square = static_cast<Square>(i);
-                pseudo |= pseudoLegal(board, square);
+                pseudo |= pseudoLegal(board, square, attacks);
             }
         }
         return pseudo;
     }
 
-    uint64_t pseudoLegal(const Board &board, Square square){
+    uint64_t pseudoLegal(const Board &board, Square square, bool attacks){
         std::optional<PieceType> pieceOpt = board.getPieceType(square);
         if(!pieceOpt.has_value()){
             return 0ULL;
@@ -86,7 +87,7 @@ namespace Movegen {
             using enum PieceType;
             case WHITE_PAWN:
             case BLACK_PAWN:
-                return pawnPseudo(board, square);
+                return pawnPseudo(board, square, attacks);
             case WHITE_KNIGHT:
             case BLACK_KNIGHT:
                 return knightPseudo(board, square);
@@ -122,11 +123,12 @@ namespace Movegen {
         return knightMask & ~occupancy;
     }
 
-    uint64_t pawnPseudo(const Board &board, Square square){
+    uint64_t pawnPseudo(const Board &board, Square square, bool attacks){
         Color color = board.getPieceColor(square);
         Rank rank = getRank(square);
         File file = getFile(square);
         uint64_t occupied_all = board.getOccupancy();
+        uint64_t occupied_friendly = (color == Color::WHITE)? board.getWhiteOccupancy() : board.getBlackOccupancy();
         uint64_t occupied_foe = (color == Color::WHITE)? board.getBlackOccupancy() : board.getWhiteOccupancy();
         uint64_t captures = (color == Color::WHITE)? W_PAWN_ATTACKS[enumToInt(square)] : B_PAWN_ATTACKS[enumToInt(square)];
         uint64_t moves = 0ULL; // initialize moves
@@ -150,7 +152,11 @@ namespace Movegen {
         }
 
         moves &= ~occupied_all;
-        moves |= (occupied_foe & captures);
+        if (attacks){
+            moves |= (captures & (~occupied_friendly));
+        } else {
+            moves |= (occupied_foe & captures);
+        }
 
         // Consider en passant 
         if(board.getEnPassantSquare() != Square::A1){
@@ -297,7 +303,7 @@ namespace Movegen {
     bool isLegalCastle(const Board &board, Move move){
         MoveCode code = move.getMoveCode();
         Color color = board.getPieceColor(move.getFrom());
-        uint64_t attackedSquares = colorPseudo(board, (color == Color::WHITE)? Color::BLACK : Color::WHITE);
+        uint64_t attackedSquares = colorPseudo(board, (color == Color::WHITE)? Color::BLACK : Color::WHITE, true);
         uint64_t occupancy = board.getOccupancy();
 
         // Can't castle out of check
@@ -316,10 +322,10 @@ namespace Movegen {
                 }
                 break;
             case MoveCode::QUEEN_CASTLE:
-                if(color == Color::WHITE && !((C1D1_MASK & occupancy) == 0 && (C1D1_MASK & attackedSquares) == 0)){
+                if(color == Color::WHITE && !((B1C1D1_MASK & occupancy) == 0 && (C1D1_MASK & attackedSquares) == 0)){
                     return false;
                 } 
-                else if (color == Color::BLACK && !((C8D8_MASK & occupancy) == 0 && (C8D8_MASK & attackedSquares) == 0)){
+                else if (color == Color::BLACK && !((B8C8D8_MASK & occupancy) == 0 && (C8D8_MASK & attackedSquares) == 0)){
                     return false;
                 }
                 break;
@@ -375,7 +381,6 @@ namespace Movegen {
         }
         return nodes;
     }
-
 
 
     uint64_t perftDivide(Board &board, int depth) {
@@ -450,7 +455,7 @@ namespace Movegen {
     }
 
 
-    // Wrapper function to initialize move counts
+    // Overloaded function to call
     void perftDivideByType(Board &board, int depth) {
         std::array<uint64_t, TOTAL_TYPES> moveCounts = {0, 0, 0, 0, 0}; // Initialize counts
 

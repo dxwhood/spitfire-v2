@@ -25,13 +25,13 @@ namespace Movegen{
 
     std::vector<Move> getPseudoMoves(const Board &board, Color color);
 
-    uint64_t colorPseudo(const Board &board, Color color); // TODO: Implement *attacks* so that pawn moves dont show up in attack checks?
+    uint64_t colorPseudo(const Board &board, Color color, bool attacks = false);
 
-    uint64_t pseudoLegal(const Board &board, Square square);
+    uint64_t pseudoLegal(const Board &board, Square square, bool attacks = false);
 
     uint64_t kingPseudo(const Board &board, Square square);
     uint64_t knightPseudo(const Board &board, Square square);
-    uint64_t pawnPseudo(const Board &board, Square square);
+    uint64_t pawnPseudo(const Board &board, Square square, bool attacks = false);
     uint64_t rookPseudo(const Board &board, Square square);
     uint64_t queenPseudo(const Board &board, Square square);
     uint64_t bishopPseudo(const Board &board, Square square);
