@@ -2,6 +2,9 @@
 #include "core/board.h"
 #include <iostream>
 #include <bit>
+#include <iostream>
+#include <vector>
+#include <iomanip> // for formatting output
 
 namespace{
     // From Nihar Karve - much cleaner way of implemententing hyperbola quintessence
@@ -371,7 +374,100 @@ namespace Movegen {
             board.unmakeMove(move);
         }
         return nodes;
-    }    
+    }
+
+
+
+    uint64_t perftDivide(Board &board, int depth) {
+        if (depth == 0) {
+            return 1;
+        }
+
+        std::vector<Move> moves = generateValidMoves(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK);
+        
+        uint64_t totalNodes = 0;
+        std::vector<std::pair<Move, uint64_t>> moveCounts; // Store each move and its perft count
+
+        for (const Move &move : moves) {
+            board.makeMove(move);
+            uint64_t moveNodes = perft(board, depth - 1);
+            board.unmakeMove(move);
+            
+            moveCounts.push_back({move, moveNodes}); // Store move and its count
+            totalNodes += moveNodes;
+        }
+
+        // Print the results
+        std::cout << "Perft divide at depth " << depth << ":\n";
+        for (const auto &[move, count] : moveCounts) {
+            std::cout << move.toUCIString() << ": " << count << std::endl;
+        }
+        std::cout << "Total nodes: " << totalNodes << std::endl;
+
+        return totalNodes;
+    }
+
+
+    uint64_t perftDivideByType(Board &board, int depth, std::array<uint64_t, TOTAL_TYPES> &moveCounts) {
+        if (depth == 0) {
+            return 1;
+        }
+
+        std::vector<Move> moves = generateValidMoves(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK);
+
+        uint64_t totalNodes = 0;
+        for (const Move &move : moves) {
+            bool atDepth1 = (depth == 1);  // Only count move types at depth 1
+
+            // Classify move type **only at depth 1**
+            if (atDepth1) {
+                MoveCode code = move.getMoveCode();
+                if (code == MoveCode::CAPTURE) {
+                    moveCounts[CAPTURES]++;
+                } else if (code == MoveCode::EN_PASSANT) {
+                    moveCounts[EN_PASSANT]++;
+                    moveCounts[CAPTURES]++;
+                } else if (code == MoveCode::KING_CASTLE || code == MoveCode::QUEEN_CASTLE) {
+                    moveCounts[CASTLES]++;
+                } else if (code == MoveCode::KNIGHT_PROMO || code == MoveCode::KNIGHT_PROMO_CAPTURE ||
+                        code == MoveCode::BISHOP_PROMO || code == MoveCode::BISHOP_PROMO_CAPTURE ||
+                        code == MoveCode::ROOK_PROMO || code == MoveCode::ROOK_PROMO_CAPTURE ||
+                        code == MoveCode::QUEEN_PROMO || code == MoveCode::QUEEN_PROMO_CAPTURE) {
+                    moveCounts[PROMOTIONS]++;
+                } else {
+                    moveCounts[QUIET_MOVES]++;
+                }
+            }
+
+            board.makeMove(move);
+            uint64_t moveNodes = perftDivideByType(board, depth - 1, moveCounts);  // Recurse
+            board.unmakeMove(move);
+
+            totalNodes += moveNodes;
+        }
+
+        return totalNodes;
+    }
+
+
+    // Wrapper function to initialize move counts
+    void perftDivideByType(Board &board, int depth) {
+        std::array<uint64_t, TOTAL_TYPES> moveCounts = {0, 0, 0, 0, 0}; // Initialize counts
+
+        uint64_t totalNodes = perftDivideByType(board, depth, moveCounts);
+
+        // Print results
+        std::cout << "Perft results by move type at depth " << depth << ":\n";
+        std::cout << "  Total Nodes: " << totalNodes << "\n";
+        std::cout << "  Captures: " << moveCounts[CAPTURES] << "\n";
+        std::cout << "  En Passant: " << moveCounts[EN_PASSANT] << "\n";
+        std::cout << "  Castles: " << moveCounts[CASTLES] << "\n";
+        std::cout << "  Promotions: " << moveCounts[PROMOTIONS] << "\n";
+        std::cout << "  Quiet Moves: " << moveCounts[QUIET_MOVES] << "\n";
+    }
+
+
+
 
 
 }

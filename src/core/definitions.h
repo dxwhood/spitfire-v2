@@ -283,6 +283,16 @@ constexpr std::array<const char*, 12> pieceNames = {
     "Black Pawn", "Black Knight", "Black Bishop", "Black Rook", "Black Queen", "Black King"
 };
 
+// Define indices for move type tracking
+enum PerftMoveType {
+    CAPTURES = 0,
+    EN_PASSANT,
+    CASTLES,
+    PROMOTIONS,
+    QUIET_MOVES,
+    TOTAL_TYPES
+};
+
 // Colors
 enum class Color : int {
     WHITE, BLACK

@@ -48,7 +48,10 @@ namespace Movegen{
     
 
     uint64_t perft(Board &board, int depth);
-    
+
+    uint64_t perftDivide(Board &board, int depth);
+    uint64_t perftDivideByType(Board &board, int depth, std::array<uint64_t, TOTAL_TYPES> &moveCounts);
+    void perftDivideByType(Board &board, int depth);
 
 
 
