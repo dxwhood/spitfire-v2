@@ -236,6 +236,20 @@ Square Board::getEnPassantSquare() const{
     return enPassantSquare;
 }
 
+int Board::getPhase() const{
+    int phase = 0;
+    for (int i = 0; i < 64; i++) {
+        Square square = static_cast<Square>(i);
+        std::optional<PieceType> pieceOpt = getPieceType(square);
+        if (!pieceOpt.has_value())
+            continue;
+        PieceType piece = pieceOpt.value();
+        int pieceIndex = enumToInt(piece);
+        phase += PHASE_VALUES[pieceIndex];
+    }
+    return phase;
+}
+
 std::array<bool, 4> Board::getCastlingRights() const{
     return castlingRights;
 }

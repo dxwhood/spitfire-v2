@@ -39,6 +39,8 @@ public:
     uint64_t getWhiteOccupancy() const;
     uint64_t getBlackOccupancy() const;
 
+    int getPhase() const;  // Returns the phase of the game
+
     // Getters
     std::array<uint64_t, 12> getBitboards() const;
     uint64_t getBitboard(PieceType piece) const;
