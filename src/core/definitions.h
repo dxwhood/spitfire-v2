@@ -5,6 +5,10 @@
 #include <optional>
 #include <string>
 
+
+const int NEG_INF = std::numeric_limits<int>::min();
+const int POS_INF = std::numeric_limits<int>::max();
+
 // File bitboards
 constexpr uint64_t A_FILE = 0x0101010101010101ULL;
 constexpr uint64_t B_FILE = 0x0202020202020202ULL;
