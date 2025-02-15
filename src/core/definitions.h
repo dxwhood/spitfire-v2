@@ -228,7 +228,16 @@ constexpr uint64_t F8G8_MASK = 0x6000000000000000ULL;
 constexpr uint64_t C8D8_MASK = 0x0C00000000000000ULL;
 
 
-
+constexpr int MIRROR_INDEX[64] = {
+    56, 57, 58, 59, 60, 61, 62, 63,
+    48, 49, 50, 51, 52, 53, 54, 55,
+    40, 41, 42, 43, 44, 45, 46, 47,
+    32, 33, 34, 35, 36, 37, 38, 39,
+    24, 25, 26, 27, 28, 29, 30, 31,
+    16, 17, 18, 19, 20, 21, 22, 23,
+     8,  9, 10, 11, 12, 13, 14, 15,
+     0,  1,  2,  3,  4,  5,  6,  7
+};
 
 // Files
 enum class File : int {
@@ -288,6 +297,26 @@ constexpr std::array<const char*, 12> pieceNames = {
     "White Pawn", "White Knight", "White Bishop", "White Rook", "White Queen", "White King",
     "Black Pawn", "Black Knight", "Black Bishop", "Black Rook", "Black Queen", "Black King"
 };
+
+constexpr int PHASE_VALUES[12] = {
+    0,  // White Pawn
+    1,  // White Knight
+    1,  // White Bishop
+    2,  // White Rook
+    4,  // White Queen
+    0,  // White King
+    0,  // Black Pawn
+    1,  // Black Knight
+    1,  // Black Bishop
+    2,  // Black Rook
+    4,  // Black Queen
+    0   // Black King
+};
+
+
+
+constexpr int TOTAL_PHASE = 24; 
+
 
 // Define indices for move type tracking
 enum PerftMoveType {
