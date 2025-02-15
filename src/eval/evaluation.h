@@ -8,9 +8,8 @@ namespace eval{
 
     int evaluate(Board &board);
 
-    int pieceValue(Board &board, Square square);
-
     
+
 
 
 

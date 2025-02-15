@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD 23)
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)      
 include_directories(${CMAKE_SOURCE_DIR}/src/core) 
-include_directories(${CMAKE_SOURCE_DIR}/src/utils) 
+include_directories(${CMAKE_SOURCE_DIR}/src/utils)
+include_directories(${CMAKE_SOURCE_DIR}/src/eval) 
+include_directories(${CMAKE_SOURCE_DIR}/src/search)
 include_directories(${CMAKE_SOURCE_DIR}/tests)
 
 
@@ -26,6 +28,12 @@ add_executable(Spitfire-v2
     src/utils/display.cpp
     src/utils/input.h
     src/utils/input.cpp
+    src/eval/evaluation.h
+    src/eval/evaluation.cpp
+    src/eval/heuristics.h
+    src/eval/heuristics.cpp
+    src/search/search.h
+    src/search/search.cpp
     tests/test_movegen.h
     tests/test_movegen.cpp
 )
