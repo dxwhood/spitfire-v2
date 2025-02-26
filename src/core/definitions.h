@@ -6,8 +6,9 @@
 #include <string>
 
 
-const int NEG_INF = std::numeric_limits<int>::min();
-const int POS_INF = std::numeric_limits<int>::max();
+const int NEG_INF = -1000000000;
+const int POS_INF = 1000000000;
+
 
 // File bitboards
 constexpr uint64_t A_FILE = 0x0101010101010101ULL;
