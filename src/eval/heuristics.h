@@ -8,6 +8,7 @@ namespace heuristics{
     
     int pieceValue(Board &board);
     int pieceSquareTable(Board &board);
+    int mobility(Board &board);
 
 
 

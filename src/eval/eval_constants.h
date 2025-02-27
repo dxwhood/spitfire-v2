@@ -32,6 +32,7 @@ constexpr std::array<int,64> WHITE_PAWN_TABLE_MG = {
     0, 0, 0, 0, 0, 0, 0, 0
 };
 
+
 constexpr std::array<int,64> BLACK_PAWN_TABLE_MG = {
     0, 0, 0, 0, 0, 0, 0, 0,
     5, 10, 10, -20, -20, 10, 10, 5,
@@ -42,6 +43,7 @@ constexpr std::array<int,64> BLACK_PAWN_TABLE_MG = {
     50, 50, 50, 50, 50, 50, 50, 50,
     0, 0, 0, 0, 0, 0, 0, 0
 };
+
 
 constexpr std::array<int,64> WHITE_KNIGHT_TABLE_MG = {
     -50, -40, -30, -30, -30, -30, -40, -50,
@@ -158,22 +160,14 @@ constexpr std::array<std::array<int, 64>, 12> PIECE_SQUARE_TABLES_MG = {
 };
 
 constexpr std::array<int, 64> WHITE_PAWN_TABLE_EG = {
-    // Rank 1
-      0,  0,  0,  0,  0,  0,  0,  0,
-    // Rank 2
-     10, 10, 10, 10, 10, 10, 10, 10,
-    // Rank 3
-     20, 20, 20, 20, 20, 20, 20, 20,
-    // Rank 4
-     30, 30, 30, 40, 40, 30, 30, 30,
-    // Rank 5
-     40, 40, 40, 50, 50, 40, 40, 40,
-    // Rank 6
-     50, 50, 50, 60, 60, 50, 50, 50,
-    // Rank 7
-     60, 60, 60, 70, 70, 60, 60, 60,
-    // Rank 8
-      0,  0,  0,  0,  0,  0,  0,  0
+      0,  0,  0,  0,  0,  0,  0,  0,     // Rank 1
+     10, 10, 10, 10, 10, 10, 10, 10,     // Rank 2
+     20, 20, 20, 20, 20, 20, 20, 20,    // Rank 3
+     30, 30, 30, 40, 40, 30, 30, 30,    // Rank 4
+     40, 40, 40, 50, 50, 40, 40, 40,    // Rank 5
+     50, 50, 50, 60, 60, 50, 50, 50,   // Rank 6
+     60, 60, 60, 70, 70, 60, 60, 60,   // Rank 7
+      0,  0,  0,  0,  0,  0,  0,  0    // Rank 8
 };
 
 
@@ -393,5 +387,31 @@ constexpr std::array<std::array<int, 64>, 12> PIECE_SQUARE_TABLES_EG = {
 };
 
 
+// Mobility Weights
+constexpr std::array<int,28> KNIGHT_MOBILITY_MG = {-30, -20, -10,  0,  5,  10,  15,  20,  25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+constexpr std::array<int,28> KNIGHT_MOBILITY_EG = {-20, -15,  -5,  0,  5,  10,  15,  20,  25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+constexpr std::array<int,28> BISHOP_MOBILITY_MG = {-10, -5,  0,  5,  10,  15,  20,  25,  30,  35,  40,  45,  50,  55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+constexpr std::array<int,28> BISHOP_MOBILITY_EG = {  0,  5,  10,  15,  20,  25,  30,  35,  40,  45,  50,  55,  60,  65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+constexpr std::array<int,28> ROOK_MOBILITY_MG = {-15, -10, -5,  0,  5,  10,  15,  20,  25,  30,  35,  40,  45,  50,  55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+constexpr std::array<int,28> ROOK_MOBILITY_EG = {-10, -5,   0,  5,  10,  15,  20,  25,  30,  35,  40,  45,  50,  55,  60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+constexpr std::array<int,28> QUEEN_MOBILITY_MG = {-10, -5,  0,  5,  10,  15,  20,  25,  30,  35,  40,  45,  50,  55,  60,  65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125};
+constexpr std::array<int,28> QUEEN_MOBILITY_EG = { -5,  0,  5, 10,  15,  20,  25,  30,  35,  40,  45,  50,  55,  60,  65,  70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130};
+
+constexpr std::array<int,28> KING_MOBILITY_MG = {-40, -30, -20, -10,  0,  5,  10,  15,  20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+constexpr std::array<int,28> KING_MOBILITY_EG = {-10,  0,  10,  20,  30,  40,  50,  60,  70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+constexpr std::array<int,28> PAWN_MOBILITY_NULL = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+// Compiled mobility table for all PieceTypes 
+constexpr std::array<std::array<int, 28>, 12> MOBILITY_TABLES_MG = {
+    PAWN_MOBILITY_NULL, KNIGHT_MOBILITY_MG, BISHOP_MOBILITY_MG, ROOK_MOBILITY_MG, QUEEN_MOBILITY_MG, KING_MOBILITY_MG,
+    PAWN_MOBILITY_NULL, KNIGHT_MOBILITY_MG, BISHOP_MOBILITY_MG, ROOK_MOBILITY_MG, QUEEN_MOBILITY_MG, KING_MOBILITY_MG
+};
+
+constexpr std::array<std::array<int, 28>, 12> MOBILITY_TABLES_EG = {
+    PAWN_MOBILITY_NULL, KNIGHT_MOBILITY_EG, BISHOP_MOBILITY_EG, ROOK_MOBILITY_EG, QUEEN_MOBILITY_EG, KING_MOBILITY_EG,
+    PAWN_MOBILITY_NULL, KNIGHT_MOBILITY_EG, BISHOP_MOBILITY_EG, ROOK_MOBILITY_EG, QUEEN_MOBILITY_EG, KING_MOBILITY_EG
+};
