@@ -480,5 +480,17 @@ Square Board::getKingSquare(Color color) const{
     return static_cast<Square>(getLSB(bitboards[enumToInt(king)]));
 }
 
+bool Board::isOpenFile(File file) const{
+    uint64_t fileMask = FILE_MASKS[enumToInt(file)];
+    return (fileMask & (getBitboard(PieceType::WHITE_PAWN) | getBitboard(PieceType::BLACK_PAWN))) == 0;
+}
+
+bool Board::isSemiOpenFile(File file, Color color) const{
+    uint64_t fileMask = FILE_MASKS[enumToInt(file)];
+    uint64_t pawns = (color == Color::WHITE)? getBitboard(PieceType::WHITE_PAWN) : getBitboard(PieceType::BLACK_PAWN);
+    return (fileMask & pawns) == 0;
+}
+
+
 
 
