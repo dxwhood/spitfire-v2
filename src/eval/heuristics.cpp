@@ -74,7 +74,7 @@ namespace heuristics{
     int kingSafety(Board &board, int phase){
         int score = 0;
         score += (pawnShield(board, Color::WHITE, phase) - pawnShield(board, Color::BLACK, phase));
-        
+        score += (kingExposure(board, Color::WHITE, phase) - kingExposure(board, Color::BLACK, phase));        
         return score;
     }
 
@@ -86,6 +86,61 @@ namespace heuristics{
         
         // Return interpolated score
         return ((PawnShieldScoreEG * (TOTAL_PHASE - phase)) + (PawnShieldScoreMG * phase)) / TOTAL_PHASE;
+    }
+
+    int kingExposure(Board &board, Color color, int phase){
+        Square kingSquare = (color == Color::WHITE)? board.getKingSquare(Color::WHITE) : board.getKingSquare(Color::BLACK);
+        int kingExposureScoreMG = 0;
+        int kingExposureScoreEG = 0;
+        File kingFile = getFile(kingSquare);
+
+        // Check king file and adjancent file for openness
+        if(board.isOpenFile(kingFile)){
+            kingExposureScoreMG -= 50;
+        } 
+        else if(board.isSemiOpenFile(kingFile, color)){
+            kingExposureScoreMG -= 25;
+        }
+
+        if(kingFile != File::A_FILE && board.isOpenFile(static_cast<File>(enumToInt(kingFile) - 1))){
+            kingExposureScoreMG -= 25;
+        }
+        else if(kingFile != File::A_FILE && board.isSemiOpenFile(static_cast<File>(enumToInt(kingFile) - 1), color)){
+            kingExposureScoreMG -= 10;
+        }
+
+        if(kingFile != File::H_FILE && board.isOpenFile(static_cast<File>(enumToInt(kingFile) + 1))){
+            kingExposureScoreMG -= 25;
+        }
+        else if(kingFile != File::H_FILE && board.isSemiOpenFile(static_cast<File>(enumToInt(kingFile) + 1), color)){
+            kingExposureScoreMG -= 10;
+        }
+
+        // check if king is castled
+        if(color == Color::WHITE){
+            if(board.getPieceType(Square::G1) == PieceType::WHITE_KING || board.getPieceType(Square::C1) == PieceType::WHITE_KING){
+                kingExposureScoreMG += 30;
+            } else{
+                kingExposureScoreMG -= 30;
+            }
+        } else{
+            if(board.getPieceType(Square::G8) == PieceType::BLACK_KING){
+                kingExposureScoreMG -= 50;
+            } else{
+                kingExposureScoreMG -= 30;
+            }
+        }
+
+
+        // Danger Zone
+        uint64_t dangerZone = KING_DANGER_ZONE_MASKS[enumToInt(kingSquare)];
+        uint64_t enemyAttacks = Movegen::colorPseudo(board, (color == Color::WHITE)? Color::BLACK : Color::WHITE);
+        uint64_t enemyOccupancy = board.getOccupancy((color == Color::WHITE)? Color::BLACK : Color::WHITE);
+        kingExposureScoreMG -= __builtin_popcountll(dangerZone & enemyAttacks) * 10;
+        kingExposureScoreMG -= __builtin_popcountll(dangerZone & enemyOccupancy) * 5;
+        
+        // Return interpolated score
+        return ((kingExposureScoreEG * (TOTAL_PHASE - phase)) + (kingExposureScoreMG * phase)) / TOTAL_PHASE;
     }
 
 }
