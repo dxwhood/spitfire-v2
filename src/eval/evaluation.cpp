@@ -11,9 +11,10 @@ namespace eval{
     int evaluate(Board &board, bool relative){
         int phase = board.getPhase();
         int score = 0;
-        score += heuristics::pieceValue(board);
-        score += heuristics::pieceSquareTable(board);
-        score += heuristics::mobility(board);
+        score += heuristics::pieceValue(board, phase);
+        score += heuristics::pieceSquareTable(board, phase);
+        score += heuristics::mobility(board, phase);
+        score += heuristics::kingSafety(board, phase);
 
         if(relative){
             return board.getIsWhiteTurn()? score : -score;
