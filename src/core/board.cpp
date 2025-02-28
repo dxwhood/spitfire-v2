@@ -469,3 +469,11 @@ void Board::unmakeMove(Move move){
     // Switch turns
     isWhiteTurn = !isWhiteTurn;
 }
+
+Square Board::getKingSquare(Color color) const{
+    PieceType king = (color == Color::WHITE)? PieceType::WHITE_KING : PieceType::BLACK_KING;
+    return static_cast<Square>(__builtin_ctzll(bitboards[enumToInt(king)]));
+}
+
+
+
