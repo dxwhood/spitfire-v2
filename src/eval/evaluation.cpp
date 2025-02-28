@@ -9,6 +9,7 @@ namespace eval{
 
     // formatted for negamax
     int evaluate(Board &board, bool relative){
+        int phase = board.getPhase();
         int score = 0;
         score += heuristics::pieceValue(board);
         score += heuristics::pieceSquareTable(board);

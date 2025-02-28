@@ -6,14 +6,12 @@ namespace chess{
 
 namespace heuristics{
     
-    int pieceValue(Board &board);
-    int pieceSquareTable(Board &board);
-    int mobility(Board &board);
-    int kingSafety(Board &board);
+    int pieceValue(Board &board, int phase);
+    int pieceSquareTable(Board &board, int phase);
+    int mobility(Board &board, int phase);
+    int kingSafety(Board &board, int phase);
 
     int pawnShield(Board &board, Color color, int phase);
-
-
 
 
 }

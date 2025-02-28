@@ -247,6 +247,11 @@ int Board::getPhase() const{
         int pieceIndex = enumToInt(piece);
         phase += PHASE_VALUES[pieceIndex];
     }
+
+    if (phase > TOTAL_PHASE) {
+        phase = TOTAL_PHASE;
+    }
+
     return phase;
 }
 

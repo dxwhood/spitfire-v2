@@ -5,7 +5,7 @@ namespace chess{
 
 namespace heuristics{
 
-    int pieceValue(Board &board){
+    int pieceValue(Board &board, int phase){
         int score = 0;
         for(int i=0; i<64; i++){
             Square square = static_cast<Square>(i);
@@ -20,7 +20,7 @@ namespace heuristics{
         return score;
     }
 
-    int pieceSquareTable(Board &board){
+    int pieceSquareTable(Board &board, int phase){
         int mgScore = 0;
         int egScore = 0;
         for(int i=0; i<64; i++){
@@ -39,16 +39,11 @@ namespace heuristics{
                 egScore -= PIECE_SQUARE_TABLES_EG[pieceIndex][i];
             }
         }
-        
-        int phase = board.getPhase();
-        if (phase >= TOTAL_PHASE){
-            phase = TOTAL_PHASE;
-        }
 
         return ((egScore * (TOTAL_PHASE - phase)) + (mgScore * phase)) / TOTAL_PHASE;
     }
 
-    int mobility(Board &board){
+    int mobility(Board &board, int phase){
         int whiteMobilityMG = 0;
         int blackMobilityMG = 0;
         int whiteMobilityEG = 0;
@@ -73,11 +68,10 @@ namespace heuristics{
         }
 
         // Return phase interpolation of the mobility scores
-        return ((whiteMobilityEG - blackMobilityEG) * (TOTAL_PHASE - board.getPhase()) + (whiteMobilityMG - blackMobilityMG) * board.getPhase()) / TOTAL_PHASE;
+        return ((whiteMobilityEG - blackMobilityEG) * (TOTAL_PHASE - phase) + (whiteMobilityMG - blackMobilityMG) * phase) / TOTAL_PHASE;
     }
 
-    int kingSafety(Board &board){
-        int phase = board.getPhase();
+    int kingSafety(Board &board, int phase){
         int score = 0;
         score += (pawnShield(board, Color::WHITE, phase) - pawnShield(board, Color::BLACK, phase));
         
