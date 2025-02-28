@@ -472,7 +472,7 @@ void Board::unmakeMove(Move move){
 
 Square Board::getKingSquare(Color color) const{
     PieceType king = (color == Color::WHITE)? PieceType::WHITE_KING : PieceType::BLACK_KING;
-    return static_cast<Square>(__builtin_ctzll(bitboards[enumToInt(king)]));
+    return static_cast<Square>(getLSB(bitboards[enumToInt(king)]));
 }
 
 

@@ -352,6 +352,10 @@ inline void clearBit(uint64_t &board, uint8_t pos){
     board &= ~(1ULL << pos);
 }
 
+inline int getLSB(uint64_t bitboard) {
+    return __builtin_ctzll(bitboard); 
+}
+
 // Move codes from nibble flag
 enum class MoveCode : uint8_t {
     QUIET = 0, DOUBLE_PAWN_PUSH, KING_CASTLE, QUEEN_CASTLE, CAPTURE, EN_PASSANT, 
