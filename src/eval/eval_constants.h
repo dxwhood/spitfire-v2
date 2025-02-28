@@ -415,3 +415,27 @@ constexpr std::array<std::array<int, 28>, 12> MOBILITY_TABLES_EG = {
     PAWN_MOBILITY_NULL, KNIGHT_MOBILITY_EG, BISHOP_MOBILITY_EG, ROOK_MOBILITY_EG, QUEEN_MOBILITY_EG, KING_MOBILITY_EG,
     PAWN_MOBILITY_NULL, KNIGHT_MOBILITY_EG, BISHOP_MOBILITY_EG, ROOK_MOBILITY_EG, QUEEN_MOBILITY_EG, KING_MOBILITY_EG
 };
+
+// King Safety
+
+// Pawn Shield Strength
+constexpr std::array<int, 4> PAWN_SHIELD_STRENGTH = {0, 20, 40, 80};
+
+
+constexpr uint64_t PAWN_SHIELD_MASKS[64] = {
+    [static_cast<size_t>(Square::G1)] = (1ULL << static_cast<size_t>(Square::F2)) | 
+                                        (1ULL << static_cast<size_t>(Square::G2)) | 
+                                        (1ULL << static_cast<size_t>(Square::H2)),
+
+    [static_cast<size_t>(Square::G8)] = (1ULL << static_cast<size_t>(Square::F7)) | 
+                                        (1ULL << static_cast<size_t>(Square::G7)) | 
+                                        (1ULL << static_cast<size_t>(Square::H7)),
+
+    [static_cast<size_t>(Square::C1)] = (1ULL << static_cast<size_t>(Square::B2)) | 
+                                        (1ULL << static_cast<size_t>(Square::C2)) | 
+                                        (1ULL << static_cast<size_t>(Square::D2)),
+
+    [static_cast<size_t>(Square::C8)] = (1ULL << static_cast<size_t>(Square::B7)) | 
+                                        (1ULL << static_cast<size_t>(Square::C7)) | 
+                                        (1ULL << static_cast<size_t>(Square::D7))
+};

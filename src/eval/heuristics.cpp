@@ -76,5 +76,23 @@ namespace heuristics{
         return ((whiteMobilityEG - blackMobilityEG) * (TOTAL_PHASE - board.getPhase()) + (whiteMobilityMG - blackMobilityMG) * board.getPhase()) / TOTAL_PHASE;
     }
 
+    int kingSafety(Board &board){
+        int phase = board.getPhase();
+        int score = 0;
+        score += (pawnShield(board, Color::WHITE, phase) - pawnShield(board, Color::BLACK, phase));
+        
+        return score;
+    }
+
+    int pawnShield(Board &board, Color color, int phase){
+        Square kingSquare = (color == Color::WHITE)? board.getKingSquare(Color::WHITE) : board.getKingSquare(Color::BLACK);
+        uint64_t pawnShield = board.getBitboard(color == Color::WHITE? PieceType::WHITE_PAWN : PieceType::BLACK_PAWN) & PAWN_SHIELD_MASKS[enumToInt(kingSquare)];
+        int PawnShieldScoreMG = PAWN_SHIELD_STRENGTH[__builtin_popcountll(pawnShield)];
+        int PawnShieldScoreEG = 0;
+        
+        // Return interpolated score
+        return ((PawnShieldScoreEG * (TOTAL_PHASE - phase)) + (PawnShieldScoreMG * phase)) / TOTAL_PHASE;
+    }
+
 }
 }

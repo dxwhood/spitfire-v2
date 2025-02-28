@@ -9,6 +9,9 @@ namespace heuristics{
     int pieceValue(Board &board);
     int pieceSquareTable(Board &board);
     int mobility(Board &board);
+    int kingSafety(Board &board);
+
+    int pawnShield(Board &board, Color color, int phase);
 
 
 
