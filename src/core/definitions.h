@@ -439,5 +439,30 @@ constexpr std::array<uint64_t, 64> generateRearFill() {
     return table;
 }
 
-constexpr std::array<uint64_t, 64> frontFill = generateFrontFill();
-constexpr std::array<uint64_t, 64> rearFill = generateRearFill();
+constexpr std::array<uint64_t, 64> generateFrontAttackFill(const std::array<uint64_t, 64>& frontFill) {
+    std::array<uint64_t, 64> table = {};
+    for (int sq = 0; sq < 64; ++sq) {
+        uint64_t front = frontFill[sq];
+        uint64_t leftAttack = (front & ~A_FILE) >> 1; // Left diagonal attacks
+        uint64_t rightAttack = (front & ~H_FILE) << 1; // Right diagonal attacks
+        table[sq] = front | leftAttack | rightAttack; // Combine all
+    }
+    return table;
+}
+
+constexpr std::array<uint64_t, 64> generateRearAttackFill(const std::array<uint64_t, 64>& rearFill) {
+    std::array<uint64_t, 64> table = {};
+    for (int sq = 0; sq < 64; ++sq) {
+        uint64_t rear = rearFill[sq];
+        uint64_t leftAttack = (rear & ~A_FILE) >> 1; // Left diagonal attacks
+        uint64_t rightAttack = (rear & ~H_FILE) << 1; // Right diagonal attacks
+        table[sq] = rear | leftAttack | rightAttack; // Combine all
+    }
+    return table;
+}
+
+constexpr std::array<uint64_t, 64> FRONT_FILL = generateFrontFill();
+constexpr std::array<uint64_t, 64> REAR_FILL = generateRearFill();
+constexpr std::array<uint64_t, 64> FRONT_ATTACK_FILL = generateFrontAttackFill(FRONT_FILL);
+constexpr std::array<uint64_t, 64> REAR_ATTACK_FILL = generateRearAttackFill(REAR_FILL);
+
