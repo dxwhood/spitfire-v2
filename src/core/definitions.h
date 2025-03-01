@@ -356,6 +356,12 @@ inline int getLSB(uint64_t bitboard) {
     return __builtin_ctzll(bitboard); 
 }
 
+inline int popLSB(uint64_t &bitboard) {
+    int index = __builtin_ctzll(bitboard); // Gets index of LSB
+    bitboard &= bitboard - 1; // Removes LSB
+    return index;
+}
+
 // Move codes from nibble flag
 enum class MoveCode : uint8_t {
     QUIET = 0, DOUBLE_PAWN_PUSH, KING_CASTLE, QUEEN_CASTLE, CAPTURE, EN_PASSANT, 
@@ -439,24 +445,24 @@ constexpr std::array<uint64_t, 64> generateRearFill() {
     return table;
 }
 
-constexpr std::array<uint64_t, 64> generateFrontAttackFill(const std::array<uint64_t, 64>& frontFill) {
+constexpr std::array<uint64_t, 64> generateFrontAttackFill(const std::array<uint64_t, 64> frontFill) {
     std::array<uint64_t, 64> table = {};
     for (int sq = 0; sq < 64; ++sq) {
         uint64_t front = frontFill[sq];
         uint64_t leftAttack = (front & ~A_FILE) >> 1; // Left diagonal attacks
         uint64_t rightAttack = (front & ~H_FILE) << 1; // Right diagonal attacks
-        table[sq] = front | leftAttack | rightAttack; // Combine all
+        table[sq] = front | leftAttack | rightAttack; 
     }
     return table;
 }
 
-constexpr std::array<uint64_t, 64> generateRearAttackFill(const std::array<uint64_t, 64>& rearFill) {
+constexpr std::array<uint64_t, 64> generateRearAttackFill(const std::array<uint64_t, 64> rearFill) {
     std::array<uint64_t, 64> table = {};
     for (int sq = 0; sq < 64; ++sq) {
         uint64_t rear = rearFill[sq];
         uint64_t leftAttack = (rear & ~A_FILE) >> 1; // Left diagonal attacks
         uint64_t rightAttack = (rear & ~H_FILE) << 1; // Right diagonal attacks
-        table[sq] = rear | leftAttack | rightAttack; // Combine all
+        table[sq] = rear | leftAttack | rightAttack; 
     }
     return table;
 }
