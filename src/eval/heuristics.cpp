@@ -78,6 +78,14 @@ namespace heuristics{
         return score;
     }
 
+    int pawnStructure(Board &board, int phase){
+        int score = 0;
+        score += (passedPawns(board, Color::WHITE, phase) - passedPawns(board, Color::BLACK, phase));
+
+        return score;
+    }
+
+
     int pawnShield(Board &board, Color color, int phase){
         Square kingSquare = (color == Color::WHITE)? board.getKingSquare(Color::WHITE) : board.getKingSquare(Color::BLACK);
         uint64_t pawnShield = board.getBitboard(color == Color::WHITE? PieceType::WHITE_PAWN : PieceType::BLACK_PAWN) & PAWN_SHIELD_MASKS[enumToInt(kingSquare)];
@@ -141,6 +149,26 @@ namespace heuristics{
         
         // Return interpolated score
         return ((kingExposureScoreEG * (TOTAL_PHASE - phase)) + (kingExposureScoreMG * phase)) / TOTAL_PHASE;
+    }
+
+    int passedPawns(Board &board, Color color, int phase){
+        uint64_t enemyAttackFill = board.getPawnAttackFill((color == Color::WHITE)? Color::BLACK : Color::WHITE);
+        uint64_t friendlyPawns = board.getBitboard((color == Color::WHITE)? PieceType::WHITE_PAWN : PieceType::BLACK_PAWN);
+        uint64_t passedPawns = friendlyPawns & ~enemyAttackFill;
+        int passedPawnsScoreMG = 0;
+
+        while (passedPawns) {
+            int square = popLSB(passedPawns);             
+            if (color == Color::WHITE) {
+                passedPawnsScoreMG += PASSED_PAWN_BONUS_WHITE[square / 8]; 
+            } else {
+                passedPawnsScoreMG += PASSED_PAWN_BONUS_BLACK[(square / 8)]; 
+            }
+        }
+
+        int passedPawnsScoreEG = passedPawnsScoreMG * 1.5;
+        // Return interpolated score
+        return ((passedPawnsScoreEG * (TOTAL_PHASE - phase)) + (passedPawnsScoreMG * phase)) / TOTAL_PHASE;
     }
 
 }

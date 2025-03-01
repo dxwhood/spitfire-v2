@@ -422,3 +422,10 @@ constexpr std::array<std::array<int, 28>, 12> MOBILITY_TABLES_EG = {
 constexpr std::array<int, 4> PAWN_SHIELD_STRENGTH = {0, 20, 40, 80};
 
 
+// Pawn Structure
+
+constexpr std::array<int, 8> PASSED_PAWN_BONUS_WHITE = {0, 10, 20, 50, 100, 300, 600, 900};
+constexpr std::array<int, 8> PASSED_PAWN_BONUS_BLACK = {900, 600, 300, 100, 50, 20, 10, 0};
+
+
+

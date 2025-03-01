@@ -15,6 +15,7 @@ namespace eval{
         score += heuristics::pieceSquareTable(board, phase);
         score += heuristics::mobility(board, phase);
         score += heuristics::kingSafety(board, phase);
+        score += heuristics::pawnStructure(board, phase);
 
         if(relative){
             return board.getIsWhiteTurn()? score : -score;
