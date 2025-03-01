@@ -38,10 +38,13 @@ public:
     uint64_t getEmpty() const;
     uint64_t getWhiteOccupancy() const;
     uint64_t getBlackOccupancy() const;
+    uint64_t getPawnFill(Color color, bool rear=false) const;
+    uint64_t getPawnAttackFill(Color color) const;
 
     Square getKingSquare(Color color) const; 
     bool isOpenFile(File file) const;
     bool isSemiOpenFile(File file, Color color) const;
+    
 
     int getPhase() const;  // Returns the phase of the game
 

@@ -1,6 +1,7 @@
 #include "board.h"
 
 
+
 using namespace chess;
 
 
@@ -491,6 +492,29 @@ bool Board::isSemiOpenFile(File file, Color color) const{
     return (fileMask & pawns) == 0;
 }
 
+uint64_t Board::getPawnFill(Color color, bool rear) const{
+    uint64_t pawns = (color == Color::WHITE)? getBitboard(PieceType::WHITE_PAWN) : getBitboard(PieceType::BLACK_PAWN);
+    if (color == Color::BLACK){
+        rear = !rear;
+    }
+    uint64_t fill = 0ULL;
+    for (int i = 0; i < 64; i++){
+        if (getBit(pawns, i)){
+            fill |= ((rear)? REAR_FILL[i] : FRONT_FILL[i]);
+        }
+    }
+    return fill;
+}
 
+uint64_t Board::getPawnAttackFill(Color color) const{
+    uint64_t pawns = (color == Color::WHITE)? getBitboard(PieceType::WHITE_PAWN) : getBitboard(PieceType::BLACK_PAWN);
+    uint64_t fill = 0ULL;
+    for (int i = 0; i < 64; i++){
+        if (getBit(pawns, i)){
+            fill |= (color == Color::WHITE)? FRONT_ATTACK_FILL[i] : REAR_ATTACK_FILL[i];
+        }
+    }
+    return fill;
+}
 
 
