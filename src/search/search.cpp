@@ -40,49 +40,102 @@ namespace search{
     }
 
 
+    // int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove) {
+    //     if (depth == 0) {
+    //         return eval::evaluate(board);  // Evaluate leaf node
+    //     }
+
+    //     int maxScore = -1000000;
+    //     Move bestFoundMove; 
+
+    //     std::vector<Move> moves = Movegen::generateValidMoves(
+    //         board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
+    //     );
+
+    //     if (moves.empty()) {  // No legal moves: checkmate or stalemate
+    //         return Movegen::isCheck(
+    //             board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
+    //         ) ? -100000 : 0;  
+    //     }
+
+    //     for (Move move : moves) {
+    //         board.makeMove(move);
+    //         Move tempMove;  // Store best move for the recursive call
+    //         int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove);
+    //         board.unmakeMove(move);
+
+    //         if (score > maxScore) {
+    //             maxScore = score;
+    //             bestFoundMove = move;
+    //         }
+            
+    //         // Update alpha, because we have found a new best move
+    //         if (score > alpha) {
+    //             alpha = score;
+    //         }
+            
+    //         // Beta cutoff: if the current score is greater than or equal to beta, prune.
+    //         if (alpha >= beta) {
+    //             break;
+    //         }
+    //     }
+
+    //     bestMove = bestFoundMove;
+    //     return maxScore;
+    // }
+
     int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove) {
-        if (depth == 0) {
-            return eval::evaluate(board);  // Evaluate leaf node
-        }
+    const int MATE_VALUE = 100000;
 
-        int maxScore = -1000000;
-        Move bestFoundMove; 
-
-        std::vector<Move> moves = Movegen::generateValidMoves(
-            board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
-        );
-
-        if (moves.empty()) {  // No legal moves: checkmate or stalemate
-            return Movegen::isCheck(
-                board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
-            ) ? -100000 : 0;  
-        }
-
-        for (Move move : moves) {
-            board.makeMove(move);
-            Move tempMove;  // Store best move for the recursive call
-            int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove);
-            board.unmakeMove(move);
-
-            if (score > maxScore) {
-                maxScore = score;
-                bestFoundMove = move;
-            }
-            
-            // Update alpha, because we have found a new best move
-            if (score > alpha) {
-                alpha = score;
-            }
-            
-            // Beta cutoff: if the current score is greater than or equal to beta, prune.
-            if (alpha >= beta) {
-                break;
-            }
-        }
-
-        bestMove = bestFoundMove;
-        return maxScore;
+    if (depth == 0) {
+        return eval::evaluate(board);  // Evaluate leaf node
     }
+
+    int maxScore = -MATE_VALUE;  // Start with a very low score
+    Move bestFoundMove; 
+
+    std::vector<Move> moves = Movegen::generateValidMoves(
+        board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
+    );
+
+    if (moves.empty()) {  // No legal moves: checkmate or stalemate
+        // If in check, it's mate; otherwise stalemate (draw)
+        return Movegen::isCheck(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK)
+               ? -MATE_VALUE + depth   // Mate: prefer faster mates (so add depth)
+               : 0;  // Stalemate = draw
+    }
+
+    for (Move move : moves) {
+        board.makeMove(move);
+        Move tempMove;  // Store best move for the recursive call
+        int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove);
+        board.unmakeMove(move);
+
+        if (std::abs(score) >= MATE_VALUE - 1000) {
+            if (score > 0)
+                score -= depth;
+            else
+                score += depth;
+        }
+
+        if (score > maxScore) {
+            maxScore = score;
+            bestFoundMove = move;
+        }
+        
+        if (score > alpha) {
+            alpha = score;
+        }
+        
+        if (alpha >= beta) {
+            break;  // Beta cutoff: prune this branch.
+        }
+    }
+
+    bestMove = bestFoundMove;
+    return maxScore;
+}
+
 
 
     int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, int indent) {
