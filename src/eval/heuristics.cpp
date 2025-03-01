@@ -1,4 +1,5 @@
 #include "heuristics.h"
+#include "utils/display.h"
 
 namespace chess{
 
@@ -85,6 +86,23 @@ namespace heuristics{
         score += (connectedPawns(board, Color::WHITE, phase) - connectedPawns(board, Color::BLACK, phase));
         
         return score;
+    }
+
+    int keySquares(Board &board, int phase){
+        uint64_t whiteAttacks = Movegen::colorPseudo(board, Color::WHITE, true);
+        uint64_t blackAttacks = Movegen::colorPseudo(board, Color::BLACK, true);
+        int keySquaresScoreMG = 0;
+
+        // Center Control
+        int whiteCenterControl = __builtin_popcountll(whiteAttacks & CENTER_SQUARES);
+        Display::printBitboard(whiteAttacks);
+        int blackCenterControl = __builtin_popcountll(blackAttacks & CENTER_SQUARES);
+        keySquaresScoreMG += (whiteCenterControl - blackCenterControl) * 20;
+
+        int keySquaresScoreEG = keySquaresScoreMG * 0.3;
+
+        // Return interpolated score
+        return ((keySquaresScoreEG * (TOTAL_PHASE - phase)) + (keySquaresScoreMG * phase)) / TOTAL_PHASE;
     }
 
     int pawnShield(Board &board, Color color, int phase){

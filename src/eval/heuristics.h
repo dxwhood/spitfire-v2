@@ -12,6 +12,7 @@ namespace heuristics{
     int mobility(Board &board, int phase);
     int kingSafety(Board &board, int phase);
     int pawnStructure(Board &board, int phase);
+    int keySquares(Board &board, int phase);
 
     int pawnShield(Board &board, Color color, int phase);
     int kingExposure(Board &board, Color color, int phase);
