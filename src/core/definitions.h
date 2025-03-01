@@ -412,3 +412,32 @@ constexpr std::array<uint64_t, 64> KING_DANGER_ZONE_MASKS = {
     0x2838000000000000ULL, 0x5070000000000000ULL, 0xA0E0000000000000ULL, 0x40C0000000000000ULL
 };
 
+
+constexpr std::array<uint64_t, 64> generateFrontFill() {
+    std::array<uint64_t, 64> table = {};
+    for (int sq = 0; sq < 64; ++sq) {
+        uint64_t mask = 0ULL;
+        int rank = sq / 8;
+        for (int r = rank + 1; r < 8; ++r) {
+            mask |= (1ULL << (sq % 8 + r * 8));  // Shift up by ranks
+        }
+        table[sq] = mask;
+    }
+    return table;
+}
+
+constexpr std::array<uint64_t, 64> generateRearFill() {
+    std::array<uint64_t, 64> table = {};
+    for (int sq = 0; sq < 64; ++sq) {
+        uint64_t mask = 0ULL;
+        int rank = sq / 8;
+        for (int r = rank - 1; r >= 0; --r) {
+            mask |= (1ULL << (sq % 8 + r * 8));  // Shift down by ranks
+        }
+        table[sq] = mask;
+    }
+    return table;
+}
+
+constexpr std::array<uint64_t, 64> frontFill = generateFrontFill();
+constexpr std::array<uint64_t, 64> rearFill = generateRearFill();
