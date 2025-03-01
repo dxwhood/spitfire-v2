@@ -82,7 +82,8 @@ namespace heuristics{
         score += (passedPawns(board, Color::WHITE, phase) - passedPawns(board, Color::BLACK, phase));
         score += (isolatedPawns(board, Color::WHITE, phase) - isolatedPawns(board, Color::BLACK, phase));
         score += (doubledPawns(board, Color::WHITE, phase) - doubledPawns(board, Color::BLACK, phase));
-
+        score += (connectedPawns(board, Color::WHITE, phase) - connectedPawns(board, Color::BLACK, phase));
+        
         return score;
     }
 
@@ -203,7 +204,7 @@ namespace heuristics{
     int doubledPawns(Board &board, Color color, int phase){
         uint64_t friendlyPawns = board.getBitboard((color == Color::WHITE)? PieceType::WHITE_PAWN : PieceType::BLACK_PAWN);
         int doubledPawnsScoreMG = 0;
-        int doubledPawnsScoreEG = 0;
+        int doubledPawnsScoreEG;
 
         while(friendlyPawns){
             int square = popLSB(friendlyPawns);
@@ -218,5 +219,25 @@ namespace heuristics{
         return ((doubledPawnsScoreEG * (TOTAL_PHASE - phase)) + (doubledPawnsScoreMG * phase)) / TOTAL_PHASE;
     }
 
+    int connectedPawns(Board &board, Color color, int phase){
+        uint64_t friendlyPawns = board.getBitboard((color == Color::WHITE)? PieceType::WHITE_PAWN : PieceType::BLACK_PAWN);
+        uint64_t friendlyPawnsCopy = friendlyPawns;
+        int connectedPawnsScoreMG = 0;
+
+        while(friendlyPawns){
+            int square = popLSB(friendlyPawns);
+            uint64_t diagonalSquares = (color == Color::WHITE)? W_PAWN_ATTACKS[square] : B_PAWN_ATTACKS[square];
+            if((diagonalSquares & friendlyPawnsCopy) != 0){
+                connectedPawnsScoreMG += CONNECTED_PAWN_BONUS;
+            }
+        }
+
+        int connectedPawnsScoreEG = connectedPawnsScoreMG * 0.3;
+
+        // Return interpolated score
+        return ((connectedPawnsScoreEG * (TOTAL_PHASE - phase)) + (connectedPawnsScoreMG * phase)) / TOTAL_PHASE;
+
+
+    }
 }
 }

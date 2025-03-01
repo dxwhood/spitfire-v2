@@ -430,3 +430,5 @@ constexpr std::array<int, 8> ISOLATED_PAWN_PENALTY_BLACK = {0, -5, -15, -20, -25
 
 constexpr std::array<int, 8> DOUBLED_PAWN_PENALTY = {0, -50, -100, -150, -200, -250, -300, -350};
 
+constexpr int CONNECTED_PAWN_BONUS = 15;
+
