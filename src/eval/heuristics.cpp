@@ -95,7 +95,6 @@ namespace heuristics{
 
         // Center Control
         int whiteCenterControl = __builtin_popcountll(whiteAttacks & CENTER_SQUARES);
-        Display::printBitboard(whiteAttacks);
         int blackCenterControl = __builtin_popcountll(blackAttacks & CENTER_SQUARES);
         keySquaresScoreMG += (whiteCenterControl - blackCenterControl) * 20;
 
