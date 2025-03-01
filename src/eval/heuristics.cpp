@@ -1,5 +1,4 @@
 #include "heuristics.h"
-#include "eval_constants.h"
 
 namespace chess{
 
@@ -81,10 +80,10 @@ namespace heuristics{
     int pawnStructure(Board &board, int phase){
         int score = 0;
         score += (passedPawns(board, Color::WHITE, phase) - passedPawns(board, Color::BLACK, phase));
+        score += (isolatedPawns(board, Color::WHITE, phase) - isolatedPawns(board, Color::BLACK, phase));
 
         return score;
     }
-
 
     int pawnShield(Board &board, Color color, int phase){
         Square kingSquare = (color == Color::WHITE)? board.getKingSquare(Color::WHITE) : board.getKingSquare(Color::BLACK);
@@ -170,6 +169,36 @@ namespace heuristics{
         // Return interpolated score
         return ((passedPawnsScoreEG * (TOTAL_PHASE - phase)) + (passedPawnsScoreMG * phase)) / TOTAL_PHASE;
     }
+
+    int isolatedPawns(Board &board, Color color, int phase){
+        uint64_t friendlyPawns = board.getBitboard((color == Color::WHITE)? PieceType::WHITE_PAWN : PieceType::BLACK_PAWN);
+        uint64_t friendlyPawnsCopy = friendlyPawns;
+        uint64_t isolatedPawns = 0ULL;
+        int isolatedPawnsScoreMG = 0;
+        int isolatedPawnsScoreEG = 0;
+
+        while(friendlyPawns){
+            int square = popLSB(friendlyPawns);
+            if((FILE_ADJACENT_MASKS[square%8] & friendlyPawnsCopy) == 0){
+                isolatedPawns |= (1ULL << square);
+            }
+        }
+
+        while(isolatedPawns){
+            int square = popLSB(isolatedPawns);
+            if(color == Color::WHITE){
+                isolatedPawnsScoreMG += ISOLATED_PAWN_PENALTY_WHITE[square/8];
+            } else{
+                isolatedPawnsScoreMG += ISOLATED_PAWN_PENALTY_BLACK[square/8];
+            }
+        }
+
+        isolatedPawnsScoreEG = isolatedPawnsScoreMG * 0.3;
+
+        // Return interpolated score
+        return ((isolatedPawnsScoreEG * (TOTAL_PHASE - phase)) + (isolatedPawnsScoreMG * phase)) / TOTAL_PHASE;
+    }
+
 
 }
 }

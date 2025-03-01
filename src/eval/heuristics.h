@@ -1,6 +1,7 @@
 #include "core/definitions.h"
 #include "core/board.h"
 #include "core/movegen.h"
+#include "eval_constants.h"
 
 namespace chess{
 
@@ -15,6 +16,7 @@ namespace heuristics{
     int pawnShield(Board &board, Color color, int phase);
     int kingExposure(Board &board, Color color, int phase);
     int passedPawns(Board &board, Color color, int phase);
+    int isolatedPawns(Board &board, Color color, int phase);
 
 
 }
