@@ -428,5 +428,5 @@ constexpr std::array<int, 8> PASSED_PAWN_BONUS_BLACK = {900, 400, 200, 100, 50, 
 constexpr std::array<int, 8> ISOLATED_PAWN_PENALTY_WHITE = {-15, -20, -25, -25, -20, -15, -5, 0};
 constexpr std::array<int, 8> ISOLATED_PAWN_PENALTY_BLACK = {0, -5, -15, -20, -25, -25, -20, -15};
 
-
+constexpr std::array<int, 8> DOUBLED_PAWN_PENALTY = {0, -50, -100, -150, -200, -250, -300, -350};
 

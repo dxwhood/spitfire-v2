@@ -81,6 +81,7 @@ namespace heuristics{
         int score = 0;
         score += (passedPawns(board, Color::WHITE, phase) - passedPawns(board, Color::BLACK, phase));
         score += (isolatedPawns(board, Color::WHITE, phase) - isolatedPawns(board, Color::BLACK, phase));
+        score += (doubledPawns(board, Color::WHITE, phase) - doubledPawns(board, Color::BLACK, phase));
 
         return score;
     }
@@ -199,6 +200,23 @@ namespace heuristics{
         return ((isolatedPawnsScoreEG * (TOTAL_PHASE - phase)) + (isolatedPawnsScoreMG * phase)) / TOTAL_PHASE;
     }
 
+    int doubledPawns(Board &board, Color color, int phase){
+        uint64_t friendlyPawns = board.getBitboard((color == Color::WHITE)? PieceType::WHITE_PAWN : PieceType::BLACK_PAWN);
+        int doubledPawnsScoreMG = 0;
+        int doubledPawnsScoreEG = 0;
+
+        while(friendlyPawns){
+            int square = popLSB(friendlyPawns);
+            uint64_t file_pawn_mask = FILE_MASKS[square%8];
+            doubledPawnsScoreMG += DOUBLED_PAWN_PENALTY[__builtin_popcountll(file_pawn_mask & friendlyPawns)]; 
+            friendlyPawns &= ~file_pawn_mask; 
+        }
+   
+        doubledPawnsScoreEG = doubledPawnsScoreMG * 0.3;
+
+        // Return interpolated score
+        return ((doubledPawnsScoreEG * (TOTAL_PHASE - phase)) + (doubledPawnsScoreMG * phase)) / TOTAL_PHASE;
+    }
 
 }
 }

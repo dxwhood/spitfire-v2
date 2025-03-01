@@ -17,6 +17,7 @@ namespace heuristics{
     int kingExposure(Board &board, Color color, int phase);
     int passedPawns(Board &board, Color color, int phase);
     int isolatedPawns(Board &board, Color color, int phase);
+    int doubledPawns(Board &board, Color color, int phase);
 
 
 }
