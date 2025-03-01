@@ -24,6 +24,10 @@ constexpr std::array<uint64_t, 8> FILE_MASKS = {
     A_FILE, B_FILE, C_FILE, D_FILE, E_FILE, F_FILE, G_FILE, H_FILE
 };
 
+constexpr std::array<uint64_t, 8> FILE_ADJACENT_MASKS = {
+    B_FILE, A_FILE | C_FILE, B_FILE | D_FILE, C_FILE | E_FILE, D_FILE | F_FILE, E_FILE | G_FILE, F_FILE | H_FILE, G_FILE
+};
+
 // Rank bitboards
 constexpr uint64_t RANK_1 = 0x00000000000000FFULL;
 constexpr uint64_t RANK_2 = 0x000000000000FF00ULL;
