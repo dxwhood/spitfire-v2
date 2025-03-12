@@ -59,3 +59,4 @@ vgcore.*
 # Ignore scratch notes and temporary project files
 notes.txt
 scratch.txt
+perft.py
