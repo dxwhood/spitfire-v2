@@ -21,9 +21,9 @@ namespace chess {
 
 namespace Movegen{
     
-    std::vector<Move> generateValidMoves(Board &board, Color color);
+    MoveList generateValidMoves(Board &board, Color color);
 
-    std::vector<Move> getPseudoMoves(const Board &board, Color color);
+    MoveList getPseudoMoves(const Board &board, Color color);
 
     uint64_t colorPseudo(const Board &board, Color color, bool attacks = false);
 
@@ -36,7 +36,7 @@ namespace Movegen{
     uint64_t queenPseudo(const Board &board, Square square);
     uint64_t bishopPseudo(const Board &board, Square square);
 
-    std::vector<Move> bitboardToMoves(const Board &board, PieceType piece, Square square, const uint64_t& bitboard);
+    MoveList bitboardToMoves(const Board &board, PieceType piece, Square square, uint64_t& bitboard);
     Move buildMove(const Board &board, PieceType piece, Square from, Square to, std::optional<PieceType> promotion = std::nullopt);
 
     bool isLegal(const Board &board);

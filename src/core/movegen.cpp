@@ -19,60 +19,62 @@ namespace chess {
 
 namespace Movegen {
 
-    std::vector<Move> generateValidMoves(Board &board, Color color){
-        std::vector<Move> allMoves;
-        std::vector<Move> pseudoMoves = getPseudoMoves(board, color);
-        for(Move move : pseudoMoves){
-            if(isLegalMove(board, move)){
-                allMoves.push_back(move);
+    MoveList generateValidMoves(Board &board, Color color){
+        MoveList moveList;
+        MoveList pseudoMoveList = getPseudoMoves(board, color);
+        for(int i=0; i<pseudoMoveList.count; i++){
+            if(isLegalMove(board, pseudoMoveList.moves[i])){
+                moveList.moves[moveList.count++] = pseudoMoveList.moves[i];
             }
         }
-        return allMoves;
+        return moveList;
     }
 
-    std::vector<Move> getPseudoMoves(const Board &board, Color color){
+    MoveList getPseudoMoves(const Board &board, Color color){
         uint64_t occupied = board.getOccupancy(color);
-        std::vector<Move> allMoves;
-        for(int i=0; i<64; i++){
-            if(getBit(occupied, i)){
-                Square square = static_cast<Square>(i);
-                std::optional<PieceType> pieceOpt = board.getPieceType(square);
-                if(!pieceOpt.has_value()){
-                    continue;
-                }
-                PieceType piece = pieceOpt.value();
-                uint64_t pseudo = pseudoLegal(board, square);
-                std::vector<Move> moves = bitboardToMoves(board, piece, square, pseudo);
-                allMoves.insert(allMoves.end(), moves.begin(), moves.end());
+        MoveList allMoveList;
+        Square square;
+        while(occupied){
+            square = static_cast<Square>(popLSB(occupied));
+            std::optional<PieceType> pieceOpt = board.getPieceType(square);
+            if(!pieceOpt.has_value()){
+                continue;
             }
+            PieceType piece = pieceOpt.value();
+            uint64_t pseudo = pseudoLegal(board, square);
+            MoveList moveList = bitboardToMoves(board, piece, square, pseudo);
+            for (int i = 0; i < moveList.count; i++){
+                allMoveList.moves[allMoveList.count++] = moveList.moves[i];
+            }
+            
         }
+
         // If castling rights are available for current color add castling moves to the list
         if (color == Color::WHITE){
             if(board.getCastlingRights()[0]){
-                allMoves.push_back(Move(Square::E1, Square::G1, 0b0010));
+                allMoveList.moves[allMoveList.count++] = Move(Square::E1, Square::G1, 0b0010);
             }
             if(board.getCastlingRights()[1]){
-                allMoves.push_back(Move(Square::E1, Square::C1, 0b0011));
+                allMoveList.moves[allMoveList.count++] = Move(Square::E1, Square::C1, 0b0011);
             }
         } else {
             if(board.getCastlingRights()[2]){
-                allMoves.push_back(Move(Square::E8, Square::G8, 0b0010));
+                allMoveList.moves[allMoveList.count++] = Move(Square::E8, Square::G8, 0b0010);
             }
             if(board.getCastlingRights()[3]){
-                allMoves.push_back(Move(Square::E8, Square::C8, 0b0011));
+                allMoveList.moves[allMoveList.count++] = Move(Square::E8, Square::C8, 0b0011);
             }
         }
-        return allMoves;
+        return allMoveList;
     }
 
     uint64_t colorPseudo(const Board &board, Color color, bool attacks){
         uint64_t occupied = board.getOccupancy(color);
         uint64_t pseudo = 0ULL;
-        for(int i=0; i<64; i++){
-            if(getBit(occupied, i)){
-                Square square = static_cast<Square>(i);
-                pseudo |= pseudoLegal(board, square, attacks);
-            }
+        Square square;
+        while(occupied){
+            square = static_cast<Square>(popLSB(occupied));
+            pseudo |= pseudoLegal(board, square, attacks);
         }
         return pseudo;
     }
@@ -213,26 +215,28 @@ namespace Movegen {
         return bishopPseudo(board, square) | rookPseudo(board, square);
     }
 
-    std::vector<Move> bitboardToMoves(const Board &board, PieceType piece, Square square, const uint64_t& bitboard){
-        std::vector<Move> moves;
-        for(int i=0; i<64; i++){
-            if(getBit(bitboard, i)){
-                if(piece == PieceType::WHITE_PAWN && getRank(square) == Rank::RANK_7){ // White pawn promotion
-                    moves.push_back(buildMove(board, piece, square, static_cast<Square>(i), PieceType::WHITE_QUEEN));
-                    moves.push_back(buildMove(board, piece, square, static_cast<Square>(i), PieceType::WHITE_ROOK));
-                    moves.push_back(buildMove(board, piece, square, static_cast<Square>(i), PieceType::WHITE_BISHOP));
-                    moves.push_back(buildMove(board, piece, square, static_cast<Square>(i), PieceType::WHITE_KNIGHT));
-                } else if(piece == PieceType::BLACK_PAWN && getRank(square) == Rank::RANK_2){ // Black pawn promotion
-                    moves.push_back(buildMove(board, piece, square, static_cast<Square>(i), PieceType::BLACK_QUEEN));
-                    moves.push_back(buildMove(board, piece, square, static_cast<Square>(i), PieceType::BLACK_ROOK));
-                    moves.push_back(buildMove(board, piece, square, static_cast<Square>(i), PieceType::BLACK_BISHOP));
-                    moves.push_back(buildMove(board, piece, square, static_cast<Square>(i), PieceType::BLACK_KNIGHT));
-                } else {
-                    moves.push_back(buildMove(board, piece, square, static_cast<Square>(i), std::nullopt)); // Normal move
-                }
+    MoveList bitboardToMoves(const Board &board, PieceType piece, Square square, uint64_t& bitboard){
+        MoveList moveList;
+        Square squareTo;
+        while(bitboard){
+            squareTo = static_cast<Square>(popLSB(bitboard));
+           
+            if(piece == PieceType::WHITE_PAWN && getRank(square) == Rank::RANK_7){ // White pawn promotion
+                moveList.moves[moveList.count++] = buildMove(board, piece, square, squareTo, PieceType::WHITE_QUEEN);
+                moveList.moves[moveList.count++] = buildMove(board, piece, square, squareTo, PieceType::WHITE_ROOK);
+                moveList.moves[moveList.count++] = buildMove(board, piece, square, squareTo, PieceType::WHITE_BISHOP);
+                moveList.moves[moveList.count++] = buildMove(board, piece, square, squareTo, PieceType::WHITE_KNIGHT);
+            } else if(piece == PieceType::BLACK_PAWN && getRank(square) == Rank::RANK_2){ // Black pawn promotion
+                moveList.moves[moveList.count++] = buildMove(board, piece, square, squareTo, PieceType::BLACK_QUEEN);
+                moveList.moves[moveList.count++] = buildMove(board, piece, square, squareTo, PieceType::BLACK_ROOK);
+                moveList.moves[moveList.count++] = buildMove(board, piece, square, squareTo, PieceType::BLACK_BISHOP);
+                moveList.moves[moveList.count++] = buildMove(board, piece, square, squareTo, PieceType::BLACK_KNIGHT);
+            } else {
+                moveList.moves[moveList.count++] = buildMove(board, piece, square, squareTo, std::nullopt); // Normal move
             }
+            
         }
-        return moves;
+        return moveList;
     }
 
     Move buildMove(const Board &board, PieceType piece, Square from, Square to, std::optional<PieceType> promotion){
@@ -374,20 +378,19 @@ namespace Movegen {
         }
         uint64_t nodes = 0;
         Color color = board.getIsWhiteTurn()? Color::WHITE : Color::BLACK;
-        std::vector<Move> moves = getPseudoMoves(board, color);
-        for(Move move : moves){
+        MoveList moveList = getPseudoMoves(board, color);
+        for(int i=0; i<moveList.count; i++){
 
-
-            if(move.getMoveCode() == MoveCode::KING_CASTLE || move.getMoveCode() == MoveCode::QUEEN_CASTLE){
-                if (!isLegalCastle(board, move)){
+            if(moveList.moves[i].getMoveCode() == MoveCode::KING_CASTLE || moveList.moves[i].getMoveCode() == MoveCode::QUEEN_CASTLE){
+                if (!isLegalCastle(board, moveList.moves[i])){
                     continue;
                 }
             }
-            board.makeMove(move);
+            board.makeMove(moveList.moves[i]);
             if (!isCheck(board, color)){
                 nodes += perft(board, depth - 1);
             }
-            board.unmakeMove(move);
+            board.unmakeMove(moveList.moves[i]);
             
         }   
         return nodes;
@@ -399,17 +402,17 @@ namespace Movegen {
             return 1;
         }
 
-        std::vector<Move> moves = generateValidMoves(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK);
+        MoveList moveList = generateValidMoves(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK);
         
         uint64_t totalNodes = 0;
         std::vector<std::pair<Move, uint64_t>> moveCounts; // Store each move and its perft count
 
-        for (const Move &move : moves) {
-            board.makeMove(move);
+        for (int i=0; i<moveList.count; i++) {
+            board.makeMove(moveList.moves[i]);
             uint64_t moveNodes = perft(board, depth - 1);
-            board.unmakeMove(move);
+            board.unmakeMove(moveList.moves[i]);
             
-            moveCounts.push_back({move, moveNodes}); // Store move and its count
+            moveCounts.push_back({moveList.moves[i], moveNodes}); // Store move and its count
             totalNodes += moveNodes;
         }
 
@@ -428,15 +431,15 @@ namespace Movegen {
             return 1;
         }
 
-        std::vector<Move> moves = generateValidMoves(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK);
+        MoveList moveList = generateValidMoves(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK);
 
         uint64_t totalNodes = 0;
-        for (const Move &move : moves) {
+        for (int i=0; i<moveList.count; i++) {
             bool atDepth1 = (depth == 1);  // Only count move types at depth 1
 
             // Classify move type **only at depth 1**
             if (atDepth1) {
-                MoveCode code = move.getMoveCode();
+                MoveCode code = moveList.moves[i].getMoveCode();
                 if (code == MoveCode::CAPTURE) {
                     moveCounts[CAPTURES]++;
                 } else if (code == MoveCode::EN_PASSANT) {
@@ -454,9 +457,9 @@ namespace Movegen {
                 }
             }
 
-            board.makeMove(move);
+            board.makeMove(moveList.moves[i]);
             uint64_t moveNodes = perftDivideByType(board, depth - 1, moveCounts);  // Recurse
-            board.unmakeMove(move);
+            board.unmakeMove(moveList.moves[i]);
 
             totalNodes += moveNodes;
         }

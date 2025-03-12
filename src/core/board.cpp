@@ -239,8 +239,10 @@ Square Board::getEnPassantSquare() const{
 
 int Board::getPhase() const{
     int phase = 0;
-    for (int i = 0; i < 64; i++) {
-        Square square = static_cast<Square>(i);
+    uint64_t occupancy = getOccupancy();
+    Square square;
+    while(occupancy) {
+        square = static_cast<Square>(popLSB(occupancy));
         std::optional<PieceType> pieceOpt = getPieceType(square);
         if (!pieceOpt.has_value())
             continue;
@@ -498,10 +500,10 @@ uint64_t Board::getPawnFill(Color color, bool rear) const{
         rear = !rear;
     }
     uint64_t fill = 0ULL;
-    for (int i = 0; i < 64; i++){
-        if (getBit(pawns, i)){
-            fill |= ((rear)? REAR_FILL[i] : FRONT_FILL[i]);
-        }
+    int i;
+    while (pawns){
+        i = popLSB(pawns);
+        fill |= ((rear)? REAR_FILL[i] : FRONT_FILL[i]);
     }
     return fill;
 }
@@ -509,10 +511,11 @@ uint64_t Board::getPawnFill(Color color, bool rear) const{
 uint64_t Board::getPawnAttackFill(Color color) const{
     uint64_t pawns = (color == Color::WHITE)? getBitboard(PieceType::WHITE_PAWN) : getBitboard(PieceType::BLACK_PAWN);
     uint64_t fill = 0ULL;
-    for (int i = 0; i < 64; i++){
-        if (getBit(pawns, i)){
-            fill |= (color == Color::WHITE)? FRONT_ATTACK_FILL[i] : REAR_ATTACK_FILL[i];
-        }
+    int i;
+    while(pawns){
+        i = popLSB(pawns);
+        fill |= (color == Color::WHITE)? FRONT_ATTACK_FILL[i] : REAR_ATTACK_FILL[i];
+
     }
     return fill;
 }

@@ -13,25 +13,25 @@ namespace search{
         int maxScore = -1000000;
         Move bestFoundMove; 
 
-        std::vector<Move> moves = Movegen::generateValidMoves(
+        MoveList moveList = Movegen::generateValidMoves(
             board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
         );
 
-        if (moves.empty()) {  // No legal moves: checkmate or stalemate
+        if (moveList.count == 0) {  // No legal moves: checkmate or stalemate
             return Movegen::isCheck(
                 board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
             ) ? -100000 : 0;  
         }
 
-        for (Move move : moves) {
-            board.makeMove(move);
+        for (int i=0; i<moveList.count; i++) {
+            board.makeMove(moveList.moves[i]);
             Move tempMove;  // Store best move for the next depth
             int score = -negamax(board, depth - 1, tempMove); // Recursive call
-            board.unmakeMove(move);
+            board.unmakeMove(moveList.moves[i]);
 
             if (score > maxScore) {
                 maxScore = score;
-                bestFoundMove = move;  
+                bestFoundMove = moveList.moves[i];  
             }
         }
 
@@ -49,22 +49,22 @@ namespace search{
     int maxScore = -MATE_VALUE;  // Start with a very low score
     Move bestFoundMove; 
 
-    std::vector<Move> moves = Movegen::generateValidMoves(
+    MoveList moveList = Movegen::generateValidMoves(
         board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
     );
 
-    if (moves.empty()) {  // No legal moves: checkmate or stalemate
+    if (moveList.count == 0) {  // No legal moves: checkmate or stalemate
         // If in check, it's mate; otherwise stalemate (draw)
         return Movegen::isCheck(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK)
                ? -MATE_VALUE + depth   // Mate: prefer faster mates (so add depth)
                : 0;  // Stalemate = draw
     }
 
-    for (Move move : moves) {
-        board.makeMove(move);
+    for (int i=0; i<moveList.count; i++) {
+        board.makeMove(moveList.moves[i]);
         Move tempMove;  // Store best move for the recursive call
         int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove);
-        board.unmakeMove(move);
+        board.unmakeMove(moveList.moves[i]);
 
         if (std::abs(score) >= MATE_VALUE - 1000) {
             if (score > 0)
@@ -75,7 +75,7 @@ namespace search{
 
         if (score > maxScore) {
             maxScore = score;
-            bestFoundMove = move;
+            bestFoundMove = moveList.moves[i];
         }
         
         if (score > alpha) {
@@ -90,8 +90,6 @@ namespace search{
     bestMove = bestFoundMove;
     return maxScore;
 }
-
-
 
     int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, int indent) {
         // Build an indentation string for pretty printing
@@ -114,11 +112,11 @@ namespace search{
         Move bestFoundMove;
         
         // Generate moves for the current side.
-        std::vector<Move> moves = Movegen::generateValidMoves(
+        MoveList moveList = Movegen::generateValidMoves(
             board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
         );
         
-        if (moves.empty()) {  // No legal moves: checkmate or stalemate
+        if (moveList.count == 0) {  // No legal moves: checkmate or stalemate
             int terminalScore = Movegen::isCheck(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK) ? -100000 : 0;
             std::cout << indentStr << "No legal moves for " << currentSide 
                     << " - returning " << terminalScore << "\n";
@@ -131,25 +129,25 @@ namespace search{
                 << " (alpha: " << alpha << ", beta: " << beta << "):\n";
         
         // Loop through each move.
-        for (const Move &move : moves) {
+        for (int i=0; i<moveList.count; i++) {
             // Print the move header at this level.
             std::cout << indentStr << "  <move-" << currentSide << " " 
-                    << move << ">" 
+                    << moveList.moves[i] << ">" 
                     << " (alpha: " << alpha << ", beta: " << beta << ")\n";
             
-            board.makeMove(move);
+            board.makeMove(moveList.moves[i]);
             Move tempMove;  // Temporary storage for the best move in the recursion
             int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove, indent + 4);
-            board.unmakeMove(move);
+            board.unmakeMove(moveList.moves[i]);
             
             // Print the score returned for this move.
             std::cout << indentStr << "  Returned score for " 
-                    << move << ": " << score << "\n";
+                    << moveList.moves[i] << ": " << score << "\n";
             
             // Update the best score and best move if needed.
             if (score > maxScore) {
                 maxScore = score;
-                bestFoundMove = move;
+                bestFoundMove = moveList.moves[i];
             }
             
             // Update alpha and check for beta cutoff.
