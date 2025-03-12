@@ -56,19 +56,33 @@ namespace movegen{
         board.fenToBoard(pgns[0]);
         //start timer
         auto start = std::chrono::high_resolution_clock::now();
-        int nodes_1 = Movegen::perft(board, 4);
+        int nodes_1 = Movegen::perft(board, 5);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed1 = end - start;
 
 
         board.fenToBoard(pgns[1]);
         start = std::chrono::high_resolution_clock::now();
-        int nodes_2 = Movegen::perft(board, 4);
+        int nodes_2 = Movegen::perft(board, 5);
         end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed2 = end - start;
+        
+        std::string nps = std::to_string(static_cast<int>(((nodes_1 / elapsed1.count()) + (nodes_2 / elapsed2.count()))/2));
+        std::string nps_formatted;
+        if(nps.length() > 9){
+            nps_formatted = nps.substr(0, nps.length()-9) + "." + nps.substr(nps.length()-7, nps.length()-8) + "B";
+        } else if(nps.length() > 6){
+            nps_formatted = nps.substr(0, nps.length()-6) + "." + nps.substr(nps.length()-4, nps.length()-5) + "M";
+        } else if(nps.length() > 3){
+            nps_formatted = nps.substr(0, nps.length()-3) + "." + nps.substr(nps.length()-1, nps.length()-2) + "K";
+        } else {
+            nps_formatted = nps;
+        }
 
-        std::cout << "nps: " << ((nodes_1 / elapsed1.count()) + (nodes_2 / elapsed2.count()))/2 << std::endl;
-    }
+        std::cout << nps_formatted << " nps" << std::endl;
+
+
+    }   
 
 
 }
