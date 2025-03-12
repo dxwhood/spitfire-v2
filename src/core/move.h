@@ -3,6 +3,7 @@
 #include <cstdint>  // Standard integer types
 #include <array>
 #include <string>
+#include <iostream>
 #include "core/definitions.h"
 
 namespace chess {

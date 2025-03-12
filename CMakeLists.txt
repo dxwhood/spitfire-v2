@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 project(Spitfire-v2)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -g -O3 -fno-omit-frame-pointer")
+
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/src)      
@@ -40,3 +42,5 @@ add_executable(Spitfire-v2
 
 # Link any required libraries (if needed)
 target_link_libraries(Spitfire-v2)
+
+
