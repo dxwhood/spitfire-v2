@@ -123,7 +123,7 @@ namespace Movegen {
         return knightMask & ~occupancy;
     }
 
-    uint64_t pawnPseudo(const Board &board, Square square, bool attacks){
+    uint64_t pawnPseudo(const Board &board, Square square, bool attacks){ // TODO: fix attacks
         Color color = board.getPieceColor(square);
         Rank rank = getRank(square);
         File file = getFile(square);
@@ -373,15 +373,26 @@ namespace Movegen {
             return 1;
         }
         uint64_t nodes = 0;
-        std::vector<Move> moves = generateValidMoves(board, board.getIsWhiteTurn()? Color::WHITE : Color::BLACK);
+        Color color = board.getIsWhiteTurn()? Color::WHITE : Color::BLACK;
+        std::vector<Move> moves = getPseudoMoves(board, color);
         for(Move move : moves){
-            board.makeMove(move);
-            nodes += perft(board, depth - 1);
-            board.unmakeMove(move);
-        }
-        return nodes;
-    }
 
+
+            if(move.getMoveCode() == MoveCode::KING_CASTLE || move.getMoveCode() == MoveCode::QUEEN_CASTLE){
+                if (!isLegalCastle(board, move)){
+                    continue;
+                }
+            }
+            board.makeMove(move);
+            if (!isCheck(board, color)){
+                nodes += perft(board, depth - 1);
+            }
+            board.unmakeMove(move);
+            
+        }   
+        return nodes;
+
+    }
 
     uint64_t perftDivide(Board &board, int depth) {
         if (depth == 0) {
@@ -411,7 +422,6 @@ namespace Movegen {
 
         return totalNodes;
     }
-
 
     uint64_t perftDivideByType(Board &board, int depth, std::array<uint64_t, TOTAL_TYPES> &moveCounts) {
         if (depth == 0) {
@@ -453,7 +463,6 @@ namespace Movegen {
 
         return totalNodes;
     }
-
 
     // Overloaded function to call
     void perftDivideByType(Board &board, int depth) {
