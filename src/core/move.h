@@ -40,7 +40,9 @@ class Move{
 };
 
 
-
-
+struct MoveList {
+    std::array<Move, 256> moves;
+    uint8_t count = 0;
+};
 
 }

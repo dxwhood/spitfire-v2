@@ -479,3 +479,4 @@ constexpr std::array<uint64_t, 64> REAR_FILL = generateRearFill();
 constexpr std::array<uint64_t, 64> FRONT_ATTACK_FILL = generateFrontAttackFill(FRONT_FILL);
 constexpr std::array<uint64_t, 64> REAR_ATTACK_FILL = generateRearAttackFill(REAR_FILL);
 
+
