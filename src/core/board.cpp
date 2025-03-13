@@ -1,4 +1,5 @@
 #include "board.h"
+#include "utils/display.h"
 
 
 
@@ -9,6 +10,10 @@ Board::Board() {
     for (int i = 0; i < 12; i++) {
         bitboards[i] = 0;
     }
+    for (int i = 0; i < 64; i++) {
+        squares[i] = std::nullopt;
+    }
+
     for (int i = 0; i < 4; i++) {
         castlingRights[i] = false;
     }
@@ -21,6 +26,9 @@ void Board::clearBoard() {
     for (int i = 0; i < 12; i++) {
         bitboards[i] = 0;
     }
+    for (int i = 0; i < 64; i++) {
+        squares[i] = std::nullopt;
+    }
 }
 
 void Board::setPieces(uint64_t bitboard, PieceType piece){
@@ -29,6 +37,11 @@ void Board::setPieces(uint64_t bitboard, PieceType piece){
 
 void Board::clearPieceType(uint64_t bitboard, PieceType piece){
     bitboards[enumToInt(piece)] &= ~bitboard;
+    for(int i=0; i<64; i++){
+        if(getPieceType(static_cast<Square>(i)) == piece){
+            squares[i] = std::nullopt;
+        }
+    }
 }
 
 void Board::setDefaultPosition(){
@@ -41,7 +54,19 @@ void Board::setDefaultPosition(){
     enPassantSquare = Square::A1;
     halfmoveClock = 0;
     isWhiteTurn = true;
+
+    // Set the mailbox
+    for (int i = 0; i < 64; i++) {
+        squares[i] = std::nullopt;
+        for(int j=0; j<12; j++){
+            if(getBit(bitboards[j], i)){
+                squares[i] = static_cast<PieceType>(j);
+            }
+        }
+    }
 }
+
+
 
 void Board::setDebugPosition(){
     for(int i=0; i<12; i++){
@@ -137,16 +162,27 @@ void Board::fenToBoard(std::string fen) {
 
     // Set the halfmove clock.
     halfmoveClock = static_cast<uint8_t>(halfmove);
+
+    // Set the mailbox
+    for (int i = 0; i < 64; i++) {
+        squares[i] = std::nullopt;
+        for(int j=0; j<12; j++){
+            if(getBit(bitboards[j], i)){
+                squares[i] = static_cast<PieceType>(j);
+            }
+        }
+    }
 }
 
 void Board::setPiece(PieceType piece, Square square){
     setBit(bitboards[enumToInt(piece)], enumToInt(square));
+    squares[enumToInt(square)] = piece;
 }
 
 void Board::clearPiece(Square square){
-    // clean for loop to clear piece
-    for(int i=0; i<12; i++){
-        clearBit(bitboards[i], enumToInt(square));
+    if (getPieceType(square).has_value()){
+        clearBit(bitboards[enumToInt(getPieceType(square).value())], enumToInt(square));
+        squares[enumToInt(square)] = std::nullopt;
     }
 }
 
@@ -159,6 +195,10 @@ void Board::movePiece(Square from, Square to){
     }
     PieceType piece = pieceOpt.value();
 
+    squares[enumToInt(from)] = squares[enumToInt(to)];
+    squares[enumToInt(to)] = std::nullopt;
+
+
     // clear destination square
     clearPiece(to);
     // move piece
@@ -168,33 +208,19 @@ void Board::movePiece(Square from, Square to){
 }
 
 Color Board::getPieceColor(Square square) const{
-    for(int i=0; i<12; i++){
-        if(getBit(bitboards[i], enumToInt(square))){
-            return (i < 6)? Color::WHITE : Color::BLACK;
-        }
+    std::optional<PieceType> pieceOpt = getPieceType(square);
+    if (!pieceOpt.has_value()) {
+        return Color::WHITE;
     }
-    return Color::WHITE; // default return
+    return (static_cast<int>(squares[enumToInt(square)].value()) < 6 ? Color::WHITE : Color::BLACK);
 }
 
 std::optional<PieceType> Board::getPieceType(Square square) const{
-    for(int i=0; i<12; i++){
-        if(getBit(bitboards[i], enumToInt(square))){
-            return static_cast<PieceType>(i);
-        }
-    }
-    return std::nullopt; // default return
+    return squares[enumToInt(square)];
 }
 
 uint64_t Board::getAllPieces(PieceType piece) const{
     return bitboards[enumToInt(piece)];
-}
-
-uint64_t Board::getOccupancy() const{
-    uint64_t board = 0;
-    for(int i=0; i<12; i++){
-        board |= bitboards[i];
-    }
-    return board;
 }
 
 uint64_t Board::getWhiteOccupancy() const{
@@ -208,6 +234,14 @@ uint64_t Board::getWhiteOccupancy() const{
 uint64_t Board::getBlackOccupancy() const{
     uint64_t board = 0;
     for(int i=6; i<12; i++){
+        board |= bitboards[i];
+    }
+    return board;
+}
+
+uint64_t Board::getOccupancy() const{
+    uint64_t board = 0;
+    for(int i=0; i<12; i++){
         board |= bitboards[i];
     }
     return board;
@@ -270,8 +304,10 @@ void Board::makeMove(Move move){
     std::optional<PieceType> pieceOpt = getPieceType(move.getFrom());
     if (!pieceOpt.has_value()) {
         std::cout << "Error (makeMove): no piece on square " << SQUARE_STRINGS[enumToInt(move.getFrom())] << std::endl;
-        // std::cout << "DEBUG2: from" << enumToInt(move.getFrom()) << " | to"  << enumToInt(move.getTo()) << std::endl;
         std::cout << move << std::endl;
+
+        // Display::printBoard(*this);
+        // printSquares();
 
         return;
     }
@@ -304,16 +340,20 @@ void Board::makeMove(Move move){
         switch (code) {
             case MoveCode::KNIGHT_PROMO:
             case MoveCode::KNIGHT_PROMO_CAPTURE:
-                setPiece((color == Color::WHITE)? PieceType::WHITE_KNIGHT : PieceType::BLACK_KNIGHT, to); break;
+                setPiece((color == Color::WHITE)? PieceType::WHITE_KNIGHT : PieceType::BLACK_KNIGHT, to); 
+                break;
             case MoveCode::BISHOP_PROMO: 
             case MoveCode::BISHOP_PROMO_CAPTURE:
-                setPiece((color == Color::WHITE)? PieceType::WHITE_BISHOP : PieceType::BLACK_BISHOP, to); break;
+                setPiece((color == Color::WHITE)? PieceType::WHITE_BISHOP : PieceType::BLACK_BISHOP, to); 
+                break;
             case MoveCode::ROOK_PROMO:
             case MoveCode::ROOK_PROMO_CAPTURE: 
-                setPiece((color == Color::WHITE)? PieceType::WHITE_ROOK : PieceType::BLACK_ROOK, to); break;
+                setPiece((color == Color::WHITE)? PieceType::WHITE_ROOK : PieceType::BLACK_ROOK, to); 
+                break;
             case MoveCode::QUEEN_PROMO: 
             case MoveCode::QUEEN_PROMO_CAPTURE:
-                setPiece((color == Color::WHITE)? PieceType::WHITE_QUEEN : PieceType::BLACK_QUEEN, to); break;
+                setPiece((color == Color::WHITE)? PieceType::WHITE_QUEEN : PieceType::BLACK_QUEEN, to); 
+                break;
             default: break;
         }
     }
@@ -448,7 +488,6 @@ void Board::unmakeMove(Move move){
             clearPiece(Square::F8);
             setPiece(PieceType::BLACK_KING, Square::E8);
             setPiece(PieceType::BLACK_ROOK, Square::H8);
-
         }
     } else if (code == MoveCode::QUEEN_CASTLE) {
         if (getPieceColor(move.getFrom()) == Color::WHITE) {
@@ -456,7 +495,6 @@ void Board::unmakeMove(Move move){
             clearPiece(Square::D1);
             setPiece(PieceType::WHITE_KING, Square::E1);
             setPiece(PieceType::WHITE_ROOK, Square::A1);
-
         } else {
             clearPiece(Square::C8);
             clearPiece(Square::D8);
@@ -513,7 +551,7 @@ uint64_t Board::getPawnAttackFill(Color color) const{
     uint64_t fill = 0ULL;
     int i;
     while(pawns){
-        i = popLSB(pawns);
+        
         fill |= (color == Color::WHITE)? FRONT_ATTACK_FILL[i] : REAR_ATTACK_FILL[i];
 
     }
@@ -521,3 +559,15 @@ uint64_t Board::getPawnAttackFill(Color color) const{
 }
 
 
+void Board::printSquares() const{
+    for (int i = 63; i >= 0; i--) {
+        std::optional<PieceType> piece = squares[(i/8) * 8 + (7-i%8)];
+        const char pieceStr = (piece.has_value())? pieceChars[enumToInt(piece.value())] : '.';
+        std::cout << pieceStr << " ";
+        if (i % 8 == 0) {
+            std::cout << std::endl;
+        }
+    }
+    std::cout << std::endl;
+
+}

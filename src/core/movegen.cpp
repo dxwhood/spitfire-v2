@@ -37,7 +37,9 @@ namespace Movegen {
         while(occupied){
             square = static_cast<Square>(popLSB(occupied));
             std::optional<PieceType> pieceOpt = board.getPieceType(square);
+
             if(!pieceOpt.has_value()){
+                std::cout << "Error: No piece on square " << SQUARE_STRINGS[enumToInt(square)] << std::endl;
                 continue;
             }
             PieceType piece = pieceOpt.value();
@@ -379,18 +381,21 @@ namespace Movegen {
         uint64_t nodes = 0;
         Color color = board.getIsWhiteTurn()? Color::WHITE : Color::BLACK;
         MoveList moveList = getPseudoMoves(board, color);
+        std::cout << (moveList.count)*1 << std::endl;
         for(int i=0; i<moveList.count; i++){
-
             if(moveList.moves[i].getMoveCode() == MoveCode::KING_CASTLE || moveList.moves[i].getMoveCode() == MoveCode::QUEEN_CASTLE){
                 if (!isLegalCastle(board, moveList.moves[i])){
                     continue;
                 }
             }
+            // board.printSquares();
             board.makeMove(moveList.moves[i]);
+            // board.printSquares();
             if (!isCheck(board, color)){
                 nodes += perft(board, depth - 1);
             }
             board.unmakeMove(moveList.moves[i]);
+            // board.printSquares();
             
         }   
         return nodes;

@@ -140,7 +140,6 @@ constexpr std::array<uint64_t, 12> MID_GAME_POSITIONS = {
     0x2000000000000000ULL   // King on f8
 };
 
-
 // Knight move bitboards
 constexpr std::array<uint64_t, 64> KNIGHT_MOVES = {
     0x0000000000020400ULL, 0x0000000000050800ULL, 0x00000000000A1100ULL, 0x0000000000142200ULL,
@@ -480,3 +479,8 @@ constexpr std::array<uint64_t, 64> FRONT_ATTACK_FILL = generateFrontAttackFill(F
 constexpr std::array<uint64_t, 64> REAR_ATTACK_FILL = generateRearAttackFill(REAR_FILL);
 
 
+// Helper Array for pieceType to Char conversion
+constexpr std::array<const char, 12> pieceChars = {
+    'P', 'N', 'B', 'R', 'Q', 'K',
+    'p', 'n', 'b', 'r', 'q', 'k'
+};

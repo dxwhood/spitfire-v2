@@ -60,6 +60,9 @@ public:
     // Making and unmaking moves
     void makeMove(Move move);
     void unmakeMove(Move move);
+
+    std::array<std::optional<PieceType>, 64> squares;  // Piece type on each square
+    void printSquares() const;  // Prints the board to the console
     
 
 private:
