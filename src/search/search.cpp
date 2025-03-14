@@ -5,6 +5,52 @@ namespace chess{
 
 namespace search{
 
+    void think(Board &board, int maxDepth, bool useTimeControl, int timeLimitMs) {
+        searchState.bestScore = NEG_INF;
+        searchState.bestScoreThisIteration = NEG_INF;
+        searchState.currentDepth = 0;
+        searchState.startTime = std::chrono::high_resolution_clock::now();
+        searchState.timeLimitMs = timeLimitMs;
+        searchState.searchStopped = false;
+        searchState.nodeCount = 0;
+
+        Move bestMove;
+
+        for (int depth = 1; depth <= maxDepth; ++depth) {
+            Move currentBestMove;
+            int score = negamaxAB(board, depth, NEG_INF, POS_INF, currentBestMove, useTimeControl);
+
+            // Check time limit if enabled
+            if (useTimeControl) {
+                if (searchState.searchStopped) {
+                        if (searchState.bestScoreThisIteration > searchState.bestScore) {
+                            searchState.bestScore = searchState.bestScoreThisIteration;
+                            bestMove = searchState.bestMove;
+                        }
+                        break; 
+                    }
+            }
+
+            // Store the best move found at this depth
+            bestMove = currentBestMove;        
+            searchState.bestMove = currentBestMove;
+            searchState.bestScore = score;
+            searchState.currentDepth = depth;
+
+
+        }
+
+        // Update time left
+        auto endTime = std::chrono::high_resolution_clock::now();
+        int elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - search::searchState.startTime).count();
+        searchState.timeLeft -= elapsedMs;
+    
+    }
+
+    void think(Board &board, int depth) {
+        think(board, depth, false, 0);
+    }
+
     int negamax(Board &board, int depth, Move &bestMove) {
         if (depth == 0) {
             return eval::evaluate(board);  // Returns evaluation score at leaf node
@@ -39,57 +85,72 @@ namespace search{
         return maxScore;
     }
 
-    int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove) {
-    const int MATE_VALUE = 100000;
+    int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, bool useTimeControl) {
+        ++search::searchState.nodeCount;
 
-    if (depth == 0) {
-        return eval::evaluate(board);  // Evaluate leaf node
+        const int MATE_VALUE = 100000;
+
+        if (__builtin_expect(search::searchState.searchStopped, 0)) {
+            return 0;
+        }
+
+        if (__builtin_expect((useTimeControl && (search::searchState.nodeCount % TIME_CHECK_INTERVAL == 0)), 0)) {
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            int elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - search::searchState.startTime).count();
+            if (elapsedMs >= search::searchState.timeLimitMs) {
+                search::searchState.searchStopped = true;
+                return 0;
+            }
+        }
+
+        if (depth == 0) {
+            return eval::evaluate(board);  // Evaluate leaf node
+        }
+
+        int maxScore = -MATE_VALUE;  
+        Move bestFoundMove; 
+
+        MoveList moveList = Movegen::generateValidMoves(
+            board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
+        );
+
+        if (moveList.count == 0) {  // No legal moves: checkmate or stalemate
+            return Movegen::isCheck(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK)
+                ? -MATE_VALUE + depth   // Mate: prefer faster mates (so add depth)
+                : 0;  // Stalemate = draw
+        }
+
+        for (int i=0; i<moveList.count; i++) {
+            board.makeMove(moveList.moves[i]);
+            Move tempMove;  // Store best move for the recursive call
+            int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove, useTimeControl);
+            board.unmakeMove(moveList.moves[i]);
+
+            if (std::abs(score) >= MATE_VALUE - 1000) {
+                if (score > 0)
+                    score -= depth;
+                else
+                    score += depth;
+            }
+
+            if (score > maxScore) {
+                maxScore = score;
+                bestFoundMove = moveList.moves[i];
+                search::searchState.bestScoreThisIteration = maxScore;
+            }
+            
+            if (score > alpha) {
+                alpha = score;
+            }
+            
+            if (alpha >= beta) {
+                break;  // Beta cutoff: prune this branch.
+            }
+        }
+
+        bestMove = bestFoundMove;
+        return maxScore;
     }
-
-    int maxScore = -MATE_VALUE;  // Start with a very low score
-    Move bestFoundMove; 
-
-    MoveList moveList = Movegen::generateValidMoves(
-        board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
-    );
-
-    if (moveList.count == 0) {  // No legal moves: checkmate or stalemate
-        // If in check, it's mate; otherwise stalemate (draw)
-        return Movegen::isCheck(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK)
-               ? -MATE_VALUE + depth   // Mate: prefer faster mates (so add depth)
-               : 0;  // Stalemate = draw
-    }
-
-    for (int i=0; i<moveList.count; i++) {
-        board.makeMove(moveList.moves[i]);
-        Move tempMove;  // Store best move for the recursive call
-        int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove);
-        board.unmakeMove(moveList.moves[i]);
-
-        if (std::abs(score) >= MATE_VALUE - 1000) {
-            if (score > 0)
-                score -= depth;
-            else
-                score += depth;
-        }
-
-        if (score > maxScore) {
-            maxScore = score;
-            bestFoundMove = moveList.moves[i];
-        }
-        
-        if (score > alpha) {
-            alpha = score;
-        }
-        
-        if (alpha >= beta) {
-            break;  // Beta cutoff: prune this branch.
-        }
-    }
-
-    bestMove = bestFoundMove;
-    return maxScore;
-}
 
     int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, int indent) {
         // Build an indentation string for pretty printing
@@ -167,7 +228,6 @@ namespace search{
         bestMove = bestFoundMove;
         return maxScore;
     }
-
 
 }
 }
