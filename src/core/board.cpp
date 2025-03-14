@@ -195,10 +195,6 @@ void Board::movePiece(Square from, Square to){
     }
     PieceType piece = pieceOpt.value();
 
-    squares[enumToInt(from)] = squares[enumToInt(to)];
-    squares[enumToInt(to)] = std::nullopt;
-
-
     // clear destination square
     clearPiece(to);
     // move piece
