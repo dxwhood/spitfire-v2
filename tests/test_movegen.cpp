@@ -17,7 +17,7 @@ namespace movegen{
         std::array<std::string, 6> expected_5 = {"44", "1486", "62379", "2103487", "89941194", "3173248218"};
         std::array<std::string, 6> expected_6 = {"46", "2079", "89890", "3894594", "164075551", "6923051137"};
         std::array<std::array<std::string, 6>, 6> expected = {expected_1, expected_2, expected_3, expected_4, expected_5, expected_6};
-        std::array<std::string, 6> pgns = {"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        std::array<std::string, 6> fens = {"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
                                           "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -",
                                            "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ", 
                                            "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
@@ -31,7 +31,7 @@ namespace movegen{
 
         for(int pos=0; pos <= 5; pos++){
             std::cout << "Position " << pos+1 << ":" << std::endl;
-            board.fenToBoard(pgns[pos]);
+            board.fenToBoard(fens[pos]);
 
             for(int i=1; i<=depth; i++){
                 uint64_t nodes = Movegen::perft(board, i);
@@ -53,7 +53,7 @@ namespace movegen{
         std::cout << "Perft Test Passed!" << std::endl;
 
         // Print node per second 
-        board.fenToBoard(pgns[0]);
+        board.fenToBoard(fens[0]);
         //start timer
         auto start = std::chrono::high_resolution_clock::now();
         int nodes_1 = Movegen::perft(board, 5);
@@ -61,7 +61,7 @@ namespace movegen{
         std::chrono::duration<double> elapsed1 = end - start;
 
 
-        board.fenToBoard(pgns[1]);
+        board.fenToBoard(fens[1]);
         start = std::chrono::high_resolution_clock::now();
         int nodes_2 = Movegen::perft(board, 5);
         end = std::chrono::high_resolution_clock::now();
