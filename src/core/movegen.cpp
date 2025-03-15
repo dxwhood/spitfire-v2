@@ -30,6 +30,17 @@ namespace Movegen {
         return moveList;
     }
 
+    MoveList generateCapturesAndChecks(Board &board, Color color){
+        MoveList moveList;
+        MoveList pseudoMoveList = getPseudoMoves(board, color);
+        for(int i=0; i<pseudoMoveList.count; i++){
+            if(isLegalCaptureCheck(board, pseudoMoveList.moves[i])){
+                moveList.moves[moveList.count++] = pseudoMoveList.moves[i];
+            }
+        }
+        return moveList;
+    }
+
     MoveList getPseudoMoves(const Board &board, Color color){
         uint64_t occupied = board.getOccupancy(color);
         MoveList allMoveList;
@@ -85,7 +96,7 @@ namespace Movegen {
         return pseudo;
     }
 
-    uint64_t pseudoLegal(const Board &board, Square square, bool attacks){
+    uint64_t pseudoLegal(const Board &board, Square square, bool captures){
         std::optional<PieceType> pieceOpt = board.getPieceType(square);
         if(!pieceOpt.has_value()){
             return 0ULL;
@@ -95,7 +106,7 @@ namespace Movegen {
             using enum PieceType;
             case WHITE_PAWN:
             case BLACK_PAWN:
-                return pawnPseudo(board, square, attacks);
+                return pawnPseudo(board, square, captures);
             case WHITE_KNIGHT:
             case BLACK_KNIGHT:
                 return knightPseudo(board, square);
@@ -131,7 +142,7 @@ namespace Movegen {
         return knightMask & ~occupancy;
     }
 
-    uint64_t pawnPseudo(const Board &board, Square square, bool attacks){ // TODO: fix attacks
+    uint64_t pawnPseudo(const Board &board, Square square, bool includeCaptures){ 
         Color color = board.getPieceColor(square);
         Rank rank = getRank(square);
         File file = getFile(square);
@@ -139,6 +150,7 @@ namespace Movegen {
         uint64_t occupied_friendly = (color == Color::WHITE)? board.getWhiteOccupancy() : board.getBlackOccupancy();
         uint64_t occupied_foe = (color == Color::WHITE)? board.getBlackOccupancy() : board.getWhiteOccupancy();
         uint64_t captures = (color == Color::WHITE)? W_PAWN_ATTACKS[enumToInt(square)] : B_PAWN_ATTACKS[enumToInt(square)];
+
         uint64_t moves = 0ULL; // initialize moves
 
         // Double Push
@@ -160,38 +172,38 @@ namespace Movegen {
         }
 
         moves &= ~occupied_all;
-        if (attacks){
-            moves |= (captures & (~occupied_friendly));
-        } else {
-            moves |= (occupied_foe & captures);
-        }
 
-        // Consider en passant 
-        if(board.getEnPassantSquare() != Square::A1){
-            switch(color){
-                using enum Color;
-                case WHITE:
-                    if(rank == Rank::RANK_5){
-                        if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 7)){
-                            moves |= (1ULL << enumToInt(square) << 7);
+
+        if (includeCaptures){
+            // Consider en passant 
+            if(board.getEnPassantSquare() != Square::A1){
+                switch(color){
+                    using enum Color;
+                    case WHITE:
+                        if(rank == Rank::RANK_5){
+                            if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 7)){
+                                moves |= (1ULL << enumToInt(square) << 7);
+                            }
+                            if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 9)){
+                                moves |= (1ULL << enumToInt(square) << 9);
+                            }
                         }
-                        if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 9)){
-                            moves |= (1ULL << enumToInt(square) << 9);
+                        break;
+                    case BLACK:
+                        if(rank == Rank::RANK_4){
+                            if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 9)){
+                                moves |= (1ULL << enumToInt(square) >> 9);
+                            }
+                            if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 7)){
+                                moves |= (1ULL << enumToInt(square) >> 7);
+                            }
                         }
-                    }
-                    break;
-                case BLACK:
-                    if(rank == Rank::RANK_4){
-                        if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 9)){
-                            moves |= (1ULL << enumToInt(square) >> 9);
-                        }
-                        if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 7)){
-                            moves |= (1ULL << enumToInt(square) >> 7);
-                        }
-                    }
-                    break;
+                        break;
+                }
             }
-        }
+            // Add captures
+            moves |= (captures & occupied_foe);
+        } 
 
         return moves;
     }
@@ -375,6 +387,27 @@ namespace Movegen {
         board.unmakeMove(move);
 
         return isLegal;
+    }
+
+    bool isLegalCaptureCheck(Board &board, Move move){
+        if(!move.isCapture()){
+            return false;
+        }
+
+        // Check for castling
+        if(move.getMoveCode() == MoveCode::KING_CASTLE || move.getMoveCode() == MoveCode::QUEEN_CASTLE){
+            if (!isLegalCastle(board, move)){
+                return false;
+            }
+        }
+
+        Color colorTurn = board.getIsWhiteTurn()? Color::WHITE : Color::BLACK;
+        board.makeMove(move);
+        bool isLegal = !isCheck(board, colorTurn);
+        bool isCheckAttack = isCheck(board, (colorTurn == Color::WHITE)? Color::BLACK : Color::WHITE);
+        board.unmakeMove(move);
+
+        return isLegal && isCheckAttack;
     }
 
 

@@ -6,13 +6,8 @@ namespace chess{
 namespace search{
 
     void think(Board &board, int maxDepth, bool useTimeControl, int timeLimitMs) {
-        searchState.bestScore = NEG_INF;
-        searchState.bestScoreThisIteration = NEG_INF;
-        searchState.currentDepth = 0;
-        searchState.startTime = std::chrono::high_resolution_clock::now();
+        searchState.reset();
         searchState.timeLimitMs = timeLimitMs;
-        searchState.searchStopped = false;
-        searchState.nodeCount = 0;
 
         Move bestMove;
 
@@ -44,45 +39,10 @@ namespace search{
         auto endTime = std::chrono::high_resolution_clock::now();
         int elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - search::searchState.startTime).count();
         searchState.timeLeft -= elapsedMs;
-    
     }
 
     void think(Board &board, int depth) {
         think(board, depth, false, 0);
-    }
-
-    int negamax(Board &board, int depth, Move &bestMove) {
-        if (depth == 0) {
-            return eval::evaluate(board);  // Returns evaluation score at leaf node
-        }
-
-        int maxScore = -1000000;
-        Move bestFoundMove; 
-
-        MoveList moveList = Movegen::generateValidMoves(
-            board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
-        );
-
-        if (moveList.count == 0) {  // No legal moves: checkmate or stalemate
-            return Movegen::isCheck(
-                board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
-            ) ? -100000 : 0;  
-        }
-
-        for (int i=0; i<moveList.count; i++) {
-            board.makeMove(moveList.moves[i]);
-            Move tempMove;  // Store best move for the next depth
-            int score = -negamax(board, depth - 1, tempMove); // Recursive call
-            board.unmakeMove(moveList.moves[i]);
-
-            if (score > maxScore) {
-                maxScore = score;
-                bestFoundMove = moveList.moves[i];  
-            }
-        }
-
-        bestMove = bestFoundMove;  
-        return maxScore;
     }
 
     int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, bool useTimeControl) {
@@ -104,7 +64,7 @@ namespace search{
         }
 
         if (depth == 0) {
-            return eval::evaluate(board);  // Evaluate leaf node
+            return quiescence(board, alpha, beta, useTimeControl); // Evaluate leaf node
         }
 
         int maxScore = -MATE_VALUE;  
@@ -151,6 +111,46 @@ namespace search{
         bestMove = bestFoundMove;
         return maxScore;
     }
+
+    int quiescence(Board &board, int alpha, int beta, bool useTimeControl) {
+        if (__builtin_expect(search::searchState.searchStopped, 0)) {
+            return 0;  // Stop searching if time is up
+        }
+
+        int standPat = eval::evaluate(board);
+
+        // Beta cutoff
+        if (standPat >= beta) {
+            return beta;
+        }
+
+        if (standPat > alpha) {
+            alpha = standPat;
+        }
+
+      
+        MoveList moveList = Movegen::generateCapturesAndChecks(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK);
+
+        for (int i = 0; i < moveList.count; i++) {
+            board.makeMove(moveList.moves[i]);
+
+            // Recursive quiescence search with negamax
+            int score = -quiescence(board, -beta, -alpha, useTimeControl);
+
+            board.unmakeMove(moveList.moves[i]);
+
+            if (score >= beta) {
+                return beta;  
+            }
+
+            if (score > alpha) {
+                alpha = score; 
+            }
+        }
+
+        return alpha;
+    }
+
 
     int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, int indent) {
         // Build an indentation string for pretty printing
@@ -226,6 +226,40 @@ namespace search{
         std::cout << indentStr << "Best score for " << currentSide 
                 << " at depth " << depth << ": " << maxScore << "\n";
         bestMove = bestFoundMove;
+        return maxScore;
+    }
+
+    int negamax(Board &board, int depth, Move &bestMove) {
+        if (depth == 0) {
+            return eval::evaluate(board);  // Returns evaluation score at leaf node
+        }
+
+        int maxScore = -1000000;
+        Move bestFoundMove; 
+
+        MoveList moveList = Movegen::generateValidMoves(
+            board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
+        );
+
+        if (moveList.count == 0) {  // No legal moves: checkmate or stalemate
+            return Movegen::isCheck(
+                board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
+            ) ? -100000 : 0;  
+        }
+
+        for (int i=0; i<moveList.count; i++) {
+            board.makeMove(moveList.moves[i]);
+            Move tempMove;  // Store best move for the next depth
+            int score = -negamax(board, depth - 1, tempMove); // Recursive call
+            board.unmakeMove(moveList.moves[i]);
+
+            if (score > maxScore) {
+                maxScore = score;
+                bestFoundMove = moveList.moves[i];  
+            }
+        }
+
+        bestMove = bestFoundMove;  
         return maxScore;
     }
 
