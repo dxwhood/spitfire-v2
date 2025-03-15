@@ -5,6 +5,9 @@
 #include <optional>
 #include <string>
 #include <chrono>
+#include <algorithm>
+#include <iostream>
+#include <vector>
 
 
 const int NEG_INF = -1000000000;

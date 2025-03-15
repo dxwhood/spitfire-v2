@@ -37,7 +37,7 @@ namespace search{
 
         // Update time left
         auto endTime = std::chrono::high_resolution_clock::now();
-        int elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - search::searchState.startTime).count();
+        int elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - searchState.startTime).count();
         searchState.timeLeft -= elapsedMs;
     }
 
@@ -46,19 +46,19 @@ namespace search{
     }
 
     int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, bool useTimeControl) {
-        ++search::searchState.nodeCount;
+        ++searchState.nodeCount;
 
         const int MATE_VALUE = 100000;
 
-        if (__builtin_expect(search::searchState.searchStopped, 0)) {
+        if (__builtin_expect(searchState.searchStopped, 0)) {
             return 0;
         }
 
-        if (__builtin_expect((useTimeControl && (search::searchState.nodeCount % TIME_CHECK_INTERVAL == 0)), 0)) {
+        if (__builtin_expect((useTimeControl && (searchState.nodeCount % TIME_CHECK_INTERVAL == 0)), 0)) {
             auto currentTime = std::chrono::high_resolution_clock::now();
-            int elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - search::searchState.startTime).count();
-            if (elapsedMs >= search::searchState.timeLimitMs) {
-                search::searchState.searchStopped = true;
+            int elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - searchState.startTime).count();
+            if (elapsedMs >= searchState.timeLimitMs) {
+                searchState.searchStopped = true;
                 return 0;
             }
         }
@@ -73,6 +73,8 @@ namespace search{
         MoveList moveList = Movegen::generateValidMoves(
             board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
         );
+
+        moveOrdering(moveList, board, depth);
 
         if (moveList.count == 0) {  // No legal moves: checkmate or stalemate
             return Movegen::isCheck(board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK)
@@ -96,14 +98,23 @@ namespace search{
             if (score > maxScore) {
                 maxScore = score;
                 bestFoundMove = moveList.moves[i];
-                search::searchState.bestScoreThisIteration = maxScore;
+                searchState.bestScoreThisIteration = maxScore;
             }
             
             if (score > alpha) {
                 alpha = score;
+                // History Heuristic
+                if (!moveList.moves[i].isCapture()) {
+                    searchState.historyHeuristic[enumToInt(moveList.moves[i].getFrom())][enumToInt(moveList.moves[i].getTo())] += depth * depth;
+                }
             }
             
             if (alpha >= beta) {
+                // Killer Heuristic
+                if (!moveList.moves[i].isCapture()) {
+                    searchState.killerMoves[depth][1] = searchState.killerMoves[depth][0];
+                    searchState.killerMoves[depth][0] = moveList.moves[i];
+            }
                 break;  // Beta cutoff: prune this branch.
             }
         }
@@ -262,6 +273,49 @@ namespace search{
         bestMove = bestFoundMove;  
         return maxScore;
     }
+
+    int moveScore(const Move &move, const Board &board, int depth) {
+        int score = 0;
+
+        // PV move
+        if (move == search::searchState.bestMove) {
+            return 1000000;
+        }
+
+        // MVV-LVA
+        if (move.isCapture()) {
+            if (move.getMoveCode() == MoveCode::EN_PASSANT) {
+                return 100000;
+            } else {
+            int victimValue = PIECE_VALUES_RELATIVE[enumToInt(board.getPieceType(move.getTo()).value())];
+            int attackerValue = PIECE_VALUES_RELATIVE[enumToInt(board.getPieceType(move.getFrom()).value())];
+            score += 100000 + (victimValue - attackerValue);  // Captures get priority
+            }
+        }
+
+        // Killer Moves
+        if (move == search::searchState.killerMoves[depth][0].value_or(Move())) {
+            score += 9000;
+        }
+        if (move == search::searchState.killerMoves[depth][1].value_or(Move())) {
+            score += 8000;
+        }
+
+        // History Heuristic
+        score += search::searchState.historyHeuristic[enumToInt(move.getFrom())][enumToInt(move.getTo())];
+
+        return score;
+        
+    }
+
+
+    void moveOrdering(MoveList &moves, const Board &board, int depth) {
+        std::stable_sort(moves.moves.begin(), moves.moves.begin() + moves.count, [&](const Move &a, const Move &b) {
+            return moveScore(a, board, depth) > moveScore(b, board, depth);
+        });
+    }
+
+
 
 }
 }
