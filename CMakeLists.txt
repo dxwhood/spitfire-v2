@@ -36,6 +36,8 @@ add_executable(Spitfire-v2
     src/eval/heuristics.cpp
     src/search/search.h
     src/search/search.cpp
+    src/search/hashing.h
+    src/search/hashing.cpp
     tests/test_movegen.h
     tests/test_movegen.cpp
 )

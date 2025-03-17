@@ -4,6 +4,7 @@
 #include "core/movegen.h"
 #include "eval/evaluation.h"
 #include "eval/eval_constants.h"
+#include "search/hashing.h"
 
 namespace chess{
 
@@ -23,6 +24,8 @@ namespace search{
         bool searchStopped = false;
         std::optional<Move> killerMoves[50][2]; // Killer moves for each depth (up to 50)
         int historyHeuristic[64][64]; 
+        TranspositionTable tt;
+
 
         void reset() {
             bestMove = Move();
@@ -45,6 +48,7 @@ namespace search{
                     historyHeuristic[i][j] = 0;
                 }
             }
+            tt = TranspositionTable();
         }
     };
 

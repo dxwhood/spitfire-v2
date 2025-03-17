@@ -31,8 +31,6 @@ namespace search{
             searchState.bestMove = currentBestMove;
             searchState.bestScore = score;
             searchState.currentDepth = depth;
-
-
         }
 
         // Update time left
@@ -63,8 +61,19 @@ namespace search{
             }
         }
 
+        uint64_t hash = searchState.tt.computeHash(board);
+        int ttScore;
+        Move ttBestMove = Move();
+
+        // Check if position already stored in TT
+        if (searchState.tt.probe(hash, depth, alpha, beta, ttScore, ttBestMove)) {
+            return ttScore;
+        }
+
+
         if (depth == 0) {
-            return quiescence(board, alpha, beta, useTimeControl); // Evaluate leaf node
+            //return quiescence(board, alpha, beta, useTimeControl); // Evaluate leaf node
+            return eval::evaluate(board);
         }
 
         int maxScore = -MATE_VALUE;  
@@ -73,6 +82,8 @@ namespace search{
         MoveList moveList = Movegen::generateValidMoves(
             board, board.getIsWhiteTurn() ? Color::WHITE : Color::BLACK
         );
+
+        // TODO: Add tt best move to the front of the move list 
 
         moveOrdering(moveList, board, depth);
 
@@ -83,6 +94,11 @@ namespace search{
         }
 
         for (int i=0; i<moveList.count; i++) {
+            
+            if (!moveList.moves[i].isValid()){
+                std::cout << "Invalid move: " << moveList.moves[i] << std::endl;
+                continue;
+            }
             board.makeMove(moveList.moves[i]);
             Move tempMove;  // Store best move for the recursive call
             int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove, useTimeControl);
@@ -119,7 +135,12 @@ namespace search{
             }
         }
 
+        // Store in TT
+        TTFlag flag = (maxScore >= beta) ? LOWERBOUND : (maxScore > alpha) ? EXACT : UPPERBOUND;
+        searchState.tt.store(hash, depth, maxScore, flag, bestFoundMove);
+
         bestMove = bestFoundMove;
+
         return maxScore;
     }
 
@@ -289,6 +310,7 @@ namespace search{
             } else {
             int victimValue = PIECE_VALUES_RELATIVE[enumToInt(board.getPieceType(move.getTo()).value())];
             int attackerValue = PIECE_VALUES_RELATIVE[enumToInt(board.getPieceType(move.getFrom()).value())];
+
             score += 100000 + (victimValue - attackerValue);  // Captures get priority
             }
         }
@@ -307,7 +329,6 @@ namespace search{
         return score;
         
     }
-
 
     void moveOrdering(MoveList &moves, const Board &board, int depth) {
         std::stable_sort(moves.moves.begin(), moves.moves.begin() + moves.count, [&](const Move &a, const Move &b) {
