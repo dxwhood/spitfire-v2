@@ -23,6 +23,10 @@ namespace chess {
     
     MoveCode Move::getMoveCode() const { return static_cast<MoveCode>(getFlags()); }
 
+    bool Move::isValid() const {
+        return *this != Move();
+    }
+
     std::string Move::toUCIString() const {
         MoveCode code = getMoveCode();
         std::string move;

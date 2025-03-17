@@ -23,7 +23,7 @@ namespace Movegen {
         MoveList moveList;
         MoveList pseudoMoveList = getPseudoMoves(board, color);
         for(int i=0; i<pseudoMoveList.count; i++){
-            if(isLegalMove(board, pseudoMoveList.moves[i])){
+            if(pseudoMoveList.moves[i].isValid() && isLegalMove(board, pseudoMoveList.moves[i])){
                 moveList.moves[moveList.count++] = pseudoMoveList.moves[i];
             }
         }
@@ -58,7 +58,7 @@ namespace Movegen {
 
 
             PieceType piece = pieceOpt.value();
-            uint64_t pseudo = pseudoLegal(board, square);
+            uint64_t pseudo = pseudoLegal(board, square, false);
             MoveList moveList = bitboardToMoves(board, piece, square, pseudo);
             for (int i = 0; i < moveList.count; i++){
                 allMoveList.moves[allMoveList.count++] = moveList.moves[i];
@@ -142,7 +142,7 @@ namespace Movegen {
         return knightMask & ~occupancy;
     }
 
-    uint64_t pawnPseudo(const Board &board, Square square, bool includeCaptures){ 
+    uint64_t pawnPseudo(const Board &board, Square square, bool includeAttacks){
         Color color = board.getPieceColor(square);
         Rank rank = getRank(square);
         File file = getFile(square);
@@ -172,39 +172,41 @@ namespace Movegen {
         }
 
         moves &= ~occupied_all;
-
-
-        if (includeCaptures){
-            // Consider en passant 
-            if(board.getEnPassantSquare() != Square::A1){
-                switch(color){
-                    using enum Color;
-                    case WHITE:
-                        if(rank == Rank::RANK_5){
-                            if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 7)){
-                                moves |= (1ULL << enumToInt(square) << 7);
-                            }
-                            if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 9)){
-                                moves |= (1ULL << enumToInt(square) << 9);
-                            }
+        
+        // Consider en passant 
+        if(board.getEnPassantSquare() != Square::A1){
+            switch(color){
+                using enum Color;
+                case WHITE:
+                    if(rank == Rank::RANK_5){
+                        if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 7)){
+                            moves |= (1ULL << enumToInt(square) << 7);
                         }
-                        break;
-                    case BLACK:
-                        if(rank == Rank::RANK_4){
-                            if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 9)){
-                                moves |= (1ULL << enumToInt(square) >> 9);
-                            }
-                            if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 7)){
-                                moves |= (1ULL << enumToInt(square) >> 7);
-                            }
+                        if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) + 9)){
+                            moves |= (1ULL << enumToInt(square) << 9);
                         }
-                        break;
-                }
+                    }
+                    break;
+                case BLACK:
+                    if(rank == Rank::RANK_4){
+                        if(file != File::A_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 9)){
+                            moves |= (1ULL << enumToInt(square) >> 9);
+                        }
+                        if(file != File::H_FILE && board.getEnPassantSquare() == static_cast<Square>(enumToInt(square) - 7)){
+                            moves |= (1ULL << enumToInt(square) >> 7);
+                        }
+                    }
+                    break;
             }
-            // Add captures
-            moves |= (captures & occupied_foe);
-        } 
+        }
+        // Add captures
+        moves |= (captures & occupied_foe);
 
+        if (includeAttacks){
+            moves |= (captures & ~occupied_friendly);
+        }
+
+       
         return moves;
     }
 
@@ -409,7 +411,6 @@ namespace Movegen {
 
         return isLegal && isCheckAttack;
     }
-
 
     uint64_t perft(Board &board, int depth){
         if(depth == 0){

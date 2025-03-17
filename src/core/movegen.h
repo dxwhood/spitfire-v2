@@ -26,14 +26,14 @@ namespace Movegen{
 
     MoveList getPseudoMoves(const Board &board, Color color);
 
-    uint64_t colorPseudo(const Board &board, Color color, bool captures = true);
-    uint64_t pseudoLegal(const Board &board, Square square, bool attacks = true);
+    uint64_t colorPseudo(const Board &board, Color color, bool attacks = false);
+    uint64_t pseudoLegal(const Board &board, Square square, bool attacks = false);
 
     
 
     uint64_t kingPseudo(const Board &board, Square square);
     uint64_t knightPseudo(const Board &board, Square square);
-    uint64_t pawnPseudo(const Board &board, Square square, bool includeCaptures = true);
+    uint64_t pawnPseudo(const Board &board, Square square, bool includeAttacks = false);
     uint64_t rookPseudo(const Board &board, Square square);
     uint64_t queenPseudo(const Board &board, Square square);
     uint64_t bishopPseudo(const Board &board, Square square);
@@ -46,7 +46,7 @@ namespace Movegen{
     bool isLegalCaptureCheck(Board &board, Move move);
     bool isLegalCastle(const Board &board, Move move);
 
-    bool isCheck(const Board &board, Color color); // Check if a color is in check
+    bool isCheck(const Board &board, Color color); 
 
     
 

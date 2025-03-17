@@ -31,6 +31,8 @@ class Move{
 
         std::string toUCIString() const;
 
+        bool isValid() const;
+
         friend std::ostream& operator<<(std::ostream& os, const Move& move);
 
         friend bool operator==(const Move& lhs, const Move& rhs);
