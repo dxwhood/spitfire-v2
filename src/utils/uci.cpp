@@ -66,6 +66,7 @@ namespace uci{
 
         // If there are moves, play them 
         while (iss >> token) {
+            if (token == "moves") continue;
             Move move = Input::parseUCIMove(globals.board, token);
             globals.board.makeMove(move);
         }
