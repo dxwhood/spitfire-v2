@@ -10,7 +10,7 @@ namespace chess{
 
 namespace search{
 
-    constexpr int TIME_CHECK_INTERVAL = 100000; // Check time every 5000 nodes
+    constexpr int TIME_CHECK_INTERVAL = 100000; 
 
     struct SearchState {
         Move bestMove = Move();
@@ -55,10 +55,14 @@ namespace search{
     // Global instance of search state
     inline SearchState searchState;
 
-    void think(Board &board, int depth, bool useTimeControl, int timeLimitMs);
+    // Atomic variable to stop search (for UCI)
+    inline std::atomic<bool> stopSearch(false);
+
+
+    void think(Board &board, int depth, bool useTimeControl, int timeLimitMs, bool uci = false);
     void think(Board &board, int depth); // no time control
 
-    int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, bool useTimeControl = false); 
+    int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, bool useTimeControl = false, bool uci = false); 
     int quiescence(Board &board, int alpha, int beta, bool useTimeControl) ;
 
     // Negamax simple search

@@ -30,6 +30,8 @@ add_executable(Spitfire-v2
     src/utils/display.cpp
     src/utils/input.h
     src/utils/input.cpp
+    src/utils/uci.h
+    src/utils/uci.cpp
     src/eval/evaluation.h
     src/eval/evaluation.cpp
     src/eval/heuristics.h

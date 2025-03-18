@@ -5,15 +5,21 @@ namespace chess{
 
 namespace search{
 
-    void think(Board &board, int maxDepth, bool useTimeControl, int timeLimitMs) {
+    void think(Board &board, int maxDepth, bool useTimeControl, int timeLimitMs, bool uci) {
         searchState.reset();
         searchState.timeLimitMs = timeLimitMs;
+
 
         Move bestMove;
 
         for (int depth = 1; depth <= maxDepth; ++depth) {
+
+            if (searchState.searchStopped) {
+                break;
+            }
+
             Move currentBestMove;
-            int score = negamaxAB(board, depth, NEG_INF, POS_INF, currentBestMove, useTimeControl);
+            int score = negamaxAB(board, depth, NEG_INF, POS_INF, currentBestMove, useTimeControl, uci);
 
             // Check time limit if enabled
             if (useTimeControl) {
@@ -31,6 +37,11 @@ namespace search{
             searchState.bestMove = currentBestMove;
             searchState.bestScore = score;
             searchState.currentDepth = depth;
+        
+            if (uci && !searchState.searchStopped) {
+                std::cout << "info depth " << depth << " score cp " << score << std::endl;
+            }
+
         }
 
         // Update time left
@@ -43,7 +54,7 @@ namespace search{
         think(board, depth, false, 0);
     }
 
-    int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, bool useTimeControl) {
+    int negamaxAB(Board &board, int depth, int alpha, int beta, Move &bestMove, bool useTimeControl, bool uci) {
         ++searchState.nodeCount;
 
         const int MATE_VALUE = 100000;
@@ -52,12 +63,24 @@ namespace search{
             return 0;
         }
 
-        if (__builtin_expect((useTimeControl && (searchState.nodeCount % TIME_CHECK_INTERVAL == 0)), 0)) {
+        // Check every TIME_CHECK_INTERVAL nodes
+        if (__builtin_expect((searchState.nodeCount % TIME_CHECK_INTERVAL == 0), 0)) {
             auto currentTime = std::chrono::high_resolution_clock::now();
             int elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - searchState.startTime).count();
-            if (elapsedMs >= searchState.timeLimitMs) {
+
+            if (useTimeControl && (elapsedMs >= searchState.timeLimitMs)) {
                 searchState.searchStopped = true;
                 return 0;
+            }
+
+            if (uci) {
+                std::cout << "info nodes " << searchState.nodeCount << std::endl;
+                std::cout << "info time " << elapsedMs << std::endl;
+                std::cout << "info nps " << searchState.nodeCount / (elapsedMs / 1000) << std::endl;
+                if (search::stopSearch.load()) {
+                    searchState.searchStopped = true;
+                    return 0;
+                }
             }
         }
 
@@ -101,7 +124,7 @@ namespace search{
             }
             board.makeMove(moveList.moves[i]);
             Move tempMove;  // Store best move for the recursive call
-            int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove, useTimeControl);
+            int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove, useTimeControl, uci);
             board.unmakeMove(moveList.moves[i]);
 
             if (std::abs(score) >= MATE_VALUE - 1000) {
