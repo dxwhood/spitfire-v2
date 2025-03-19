@@ -77,7 +77,7 @@ namespace uci{
         std::string token;
         iss >> token;  // Skip "go"
 
-        int timeWhite = -1, timeBlack = -1, movetime = -1;
+        int timeWhite = -1, timeBlack = -1, movetime = -1, movestogo = -1;
         int depth = 30;
         bool infinite = false;
         
@@ -85,6 +85,7 @@ namespace uci{
             if (token == "wtime") iss >> timeWhite;
             else if (token == "btime") iss >> timeBlack;
             else if (token == "movetime") iss >> movetime;
+            else if (token == "movestogo") iss >> movestogo;
             else if (token == "depth") iss >> depth;
             else if (token == "infinite") infinite = true;
 
@@ -95,6 +96,10 @@ namespace uci{
             movetime = (globals.board.getIsWhiteTurn()) ? timeWhite/40 : timeBlack/40;
         }
 
+        if (movestogo != -1) {
+            movetime = (globals.board.getIsWhiteTurn()) ? timeWhite/movestogo : timeBlack/movestogo;
+        }
+
         // For infinite mode, spawn the listener thread.
         if (infinite) {
             search::stopSearch.store(false);
@@ -102,7 +107,9 @@ namespace uci{
             inputThread.detach();  
         }
 
-        search::think(globals.board, 30, !infinite, movetime, true); // Perform search
+
+
+        search::think(globals.board, 30, !infinite, movetime-500, true); // Perform search
 
         std::cout << "bestmove " << search::searchState.bestMove.toUCIString() << std::endl;
     }
