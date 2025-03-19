@@ -1,18 +1,24 @@
-#include <iostream>
 #include "core/board.h"
-#include "core/moves.h"
+#include "core/movegen.h"
+#include "core/game.h"
+#include "utils/display.h"
+#include "utils/input.h"
+#include "eval/evaluation.h"
+#include "search/search.h"
+#include "../tests/test_movegen.h"
+#include <iostream>
+#include <string>
+#include "eval/heuristics.h"
+#include "eval/eval_constants.h"
+#include "utils/uci.h"
+
 
 using namespace chess;
 
 
+
 int main() {
-    std::cout << "Spitfire Chess Engine Started!" << std::endl;
-    chess::Board board;
-    board.printBoard();
-    board.printPiece(chess::PieceType::WHITE_PAWN);
-    std::cout<<std::endl;
-    
-    board.printBitboard(chess::Moves::kingPseudo(board, Square::A1, Color::WHITE));
+    uci::loop();
 
     return 0;
 }
