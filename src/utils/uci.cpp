@@ -93,7 +93,7 @@ namespace uci{
 
 
         if (movetime == -1) {
-            movetime = (globals.board.getIsWhiteTurn()) ? timeWhite/40 : timeBlack/40;
+            movetime = (globals.board.getIsWhiteTurn()) ? timeWhite/20 : timeBlack/20;
         }
 
         if (movestogo != -1) {
