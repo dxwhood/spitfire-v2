@@ -1,5 +1,6 @@
 #include "game.h"
 
+
 namespace chess {
 
 
@@ -7,68 +8,82 @@ Game::Game() {
     board.setDefaultPosition();
 }
 
-void Game::start(bool playerWhite) {
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+void Game::start(bool playerWhite, std::string fen, int thinkTime) {
+    // Set FEN if provided.
+    if (!fen.empty()) {
+        board.fenToBoard(fen);
+    } else {
+        board.setDefaultPosition();
+    }
+    
+    bool useTimeControl = true;
     Move parsedMove;
     Move prevMove;
+    
+    // Initial board display before any moves.
+    clearScreen();
     Display::printBoard(board);
-    bool loop = true;
-
-    // Rewrite of the game loop
-    while(true){
-        if(board.getIsWhiteTurn() == playerWhite){
-            std::vector<Move> playerMoves = Movegen::generateValidMoves(board, playerWhite? Color::WHITE : Color::BLACK);
-            if (playerMoves.size() == 0) {
-                // check for stalemate by checking if in check
-                if (Movegen::isCheck(board, playerWhite? Color::WHITE : Color::BLACK)) {
+    
+    while (true) {
+        clearScreen();
+        Display::printBoard(board, prevMove);
+        
+        if (board.getIsWhiteTurn() == playerWhite) {
+            // Player's turn.
+            MoveList playerMoveList = Movegen::generateValidMoves(board, playerWhite ? Color::WHITE : Color::BLACK);
+            if (playerMoveList.count == 0) {
+                // Check for checkmate or stalemate.
+                if (Movegen::isCheck(board, playerWhite ? Color::WHITE : Color::BLACK)) {
                     std::cout << "Checkmate! You win!" << std::endl;
                 } else {
                     std::cout << "Stalemate! It's a draw!" << std::endl;
                 }
-                // exit the game loop
-                loop = false;
-                break;
+                break;  // Exit game loop.
             }
-
+            
+            // Build a vector of legal moves for easy checking.
+            std::vector<Move> playerMoves;
+            for (int i = 0; i < playerMoveList.count; i++) {
+                playerMoves.push_back(playerMoveList.moves[i]);
+            }
+            
             parsedMove = Input::parseUCIMove(board, Input::inputMove());
-            while(std::find(playerMoves.begin(), playerMoves.end(), parsedMove) == playerMoves.end()){
+            // If move is illegal, prompt again.
+            while (std::find(playerMoves.begin(), playerMoves.end(), parsedMove) == playerMoves.end()) {
                 std::cout << "Illegal move. Please try again." << std::endl;
-                std::cout << parsedMove << std::endl;
                 parsedMove = Input::parseUCIMove(board, Input::inputMove());
             }
+            
             board.makeMove(parsedMove);
             prevMove = parsedMove;
         } else {
-            std::vector<Move> engineMoves = Movegen::generateValidMoves(board, playerWhite? Color::BLACK : Color::WHITE);
-            if(engineMoves.size() == 0){
-                // check for stalemate by checking if in check
-                if(Movegen::isCheck(board, Color::BLACK)){
+            // Engine's turn.
+            MoveList engineMoveList = Movegen::generateValidMoves(board, playerWhite ? Color::BLACK : Color::WHITE);
+            if (engineMoveList.count == 0) {
+                if (Movegen::isCheck(board, playerWhite ? Color::BLACK : Color::WHITE)) {
                     std::cout << "Checkmate! You win!" << std::endl;
                 } else {
                     std::cout << "Stalemate! It's a draw!" << std::endl;
                 }
-                // exit the game loop
-                loop = false;
-                break;
+                break;  // Exit game loop.
             }
-
-            // Random move for now
-            Move engineMove = engineMoves[rand() % engineMoves.size()];
-            board.makeMove(engineMove);
-            // print engine move
-            std::cout << "Engine move: " << engineMove.toUCIString() << std::endl;
-
-            prevMove = engineMove;
-        }
-
-        if (loop) {
-            Display::printBoard(board, prevMove);
+            
+            search::think(board, 30, useTimeControl, 2000);
+            board.makeMove(search::searchState.bestMove);
+            std::cout << "Engine move: " << search::searchState.bestMove 
+                      << "  Evaluation: " << eval::evaluate(board) << std::endl;
+            prevMove = search::searchState.bestMove;
         }
     }
-
-
 }
-
-    
 
 
 }

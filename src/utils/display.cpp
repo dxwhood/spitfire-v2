@@ -81,6 +81,9 @@ namespace Display{
             }
             std::cout << std::endl;
         }
+
+        std::cout << std::endl;
+
     }
 
 
@@ -127,8 +130,6 @@ namespace Display{
 
 
     void printBitboard(uint64_t bitboard){
-
-        std::cout << "Printing Bitboard... " << std::endl << std::endl;
         // Create a board with empty squares as spaces.
         std::array<std::array<std::string, 8>, 8> char_board;
         for (auto &row : char_board) {
@@ -157,7 +158,9 @@ namespace Display{
             }
             std::cout << std::endl;
         }
+        std::cout << std::endl;
     }
+
 
 
     void highlightPiece(const Board &board, PieceType piece){
