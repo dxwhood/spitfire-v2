@@ -29,6 +29,8 @@ void Board::clearBoard() {
     for (int i = 0; i < 64; i++) {
         squares[i] = std::nullopt;
     }
+    // clear the repition table unordered map
+    repetitionTable.clear();
 }
 
 void Board::setPieces(uint64_t bitboard, PieceType piece){
@@ -45,6 +47,7 @@ void Board::clearPieceType(uint64_t bitboard, PieceType piece){
 }
 
 void Board::setDefaultPosition(){
+    clearBoard();
     for(int i=0; i<12; i++){
         bitboards[i] = STARTING_POSITIONS[i];
     }
@@ -66,15 +69,7 @@ void Board::setDefaultPosition(){
     }
 }
 
-
-
-void Board::setDebugPosition(){
-    for(int i=0; i<12; i++){
-        bitboards[i] = MID_GAME_POSITIONS[i];
-    }
-}
-
-// Had o3-mini-high do it to save time. Seems to work fine for now but will need testing/rewriting.
+// Had o3-mini-high make this to save time. Seems to work fine for now but will need testing/rewriting.
 void Board::fenToBoard(std::string fen) {
     // Clear current board state.
     clearBoard();
@@ -190,7 +185,6 @@ void Board::movePiece(Square from, Square to){
     std::optional<PieceType> pieceOpt = getPieceType(from);
     if (!pieceOpt.has_value()) {
         std::cout << "Error (movePiece): no piece on square " << SQUARE_STRINGS[enumToInt(from)] << std::endl;
-        //std::cout << "DEBUG: from" << enumToInt(from) << " | to"  << enumToInt(to) << std::endl;
         return;
     }
     PieceType piece = pieceOpt.value();
@@ -300,11 +294,6 @@ void Board::makeMove(Move move){
     std::optional<PieceType> pieceOpt = getPieceType(move.getFrom());
     if (!pieceOpt.has_value()) {
         std::cout << "Error (makeMove): no piece on square " << SQUARE_STRINGS[enumToInt(move.getFrom())] << std::endl;
-        std::cout << move << std::endl;
-
-        // Display::printBoard(*this);
-        // printSquares();
-
         return;
     }
     PieceType piece = pieceOpt.value();
@@ -443,8 +432,6 @@ void Board::makeMove(Move move){
 
     // Switch turns
     isWhiteTurn = !isWhiteTurn;
-
-    
 }
 
 void Board::unmakeMove(Move move){

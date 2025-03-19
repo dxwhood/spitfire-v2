@@ -10,6 +10,7 @@
 #include "move.h"
 #include <sstream>
 #include <cctype>
+#include <unordered_map>
 
 namespace chess {
 
@@ -20,10 +21,8 @@ public:
 
     void setPieces(uint64_t bitboard, PieceType piece); // Sets a piece type on the board based on a bitboard
     void clearPieceType(uint64_t bitboard, PieceType piece); // Clears a piece type on the board based on a bitboard
-    void setDebugPosition();  // Sets the mid game position for debugging
     void fenToBoard(std::string fen);  // Sets the board based on a FEN string
 
-    // Game related functions
     void setDefaultPosition();  // Sets the default starting position
     void setPiece(PieceType piece, Square square);  // Sets a piece on the board
     void movePiece(Square from, Square to);  // Moves a piece on the board
@@ -63,7 +62,9 @@ public:
 
     std::array<std::optional<PieceType>, 64> squares;  // Piece type on each square
     void printSquares() const;  // Prints the board to the console
-    
+
+    std::unordered_map<uint64_t, int> repetitionTable;
+
 
 private:
     std::array<uint64_t, 12> bitboards;  // Bitboard for each piece type

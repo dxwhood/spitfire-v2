@@ -93,10 +93,13 @@ namespace search{
             return ttScore;
         }
 
-
         if (depth == 0) {
-            //return quiescence(board, alpha, beta, useTimeControl); // Evaluate leaf node
-            return eval::evaluate(board);
+            return quiescence(board, alpha, beta, useTimeControl); // Evaluate leaf node
+        }
+
+        // Check for threefold repetition
+        if (board.repetitionTable[hash] >= 3) {
+            return 0;
         }
 
         int maxScore = -MATE_VALUE;  
@@ -107,6 +110,10 @@ namespace search{
         );
 
         // TODO: Add tt best move to the front of the move list 
+        // Add tt best move to the front of the move list
+        // if (ttBestMove.isValid()) {
+        //     moveList.moves[moveList.count++] = ttBestMove;
+        // }
 
         moveOrdering(moveList, board, depth);
 
@@ -123,8 +130,10 @@ namespace search{
                 continue;
             }
             board.makeMove(moveList.moves[i]);
+            board.repetitionTable[searchState.tt.computeHash(board)]++;
             Move tempMove;  // Store best move for the recursive call
             int score = -negamaxAB(board, depth - 1, -beta, -alpha, tempMove, useTimeControl, uci);
+            board.repetitionTable[searchState.tt.computeHash(board)]--;
             board.unmakeMove(moveList.moves[i]);
 
             if (std::abs(score) >= MATE_VALUE - 1000) {
