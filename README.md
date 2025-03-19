@@ -31,7 +31,7 @@ make
 After compiling, you can run the engine for terminal play with:
 
 ```bash
-./spitfire-v2 --console --white
+./Spitfire-v2 --console --white
 ```
 You can replace `--white` with `--black` to play as black.
 
