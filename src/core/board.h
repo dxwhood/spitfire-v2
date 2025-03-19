@@ -55,6 +55,7 @@ public:
     Square getEnPassantSquare() const;
     bool getIsWhiteTurn() const;
     std::array<bool, 4> getCastlingRights() const;
+    uint8_t getHalfmoveClock() const;
 
     // Making and unmaking moves
     void makeMove(Move move);

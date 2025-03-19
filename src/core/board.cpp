@@ -290,6 +290,10 @@ bool Board::getIsWhiteTurn() const{
     return isWhiteTurn;
 }
 
+uint8_t Board::getHalfmoveClock() const{
+    return halfmoveClock;
+}
+
 void Board::makeMove(Move move){
     std::optional<PieceType> pieceOpt = getPieceType(move.getFrom());
     if (!pieceOpt.has_value()) {

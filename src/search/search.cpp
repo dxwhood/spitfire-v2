@@ -102,6 +102,11 @@ namespace search{
             return 0;
         }
 
+        // Check for fifty-move rule
+        if (board.getHalfmoveClock() >= 100) {
+            return 0;
+        }
+
         int maxScore = -MATE_VALUE;  
         Move bestFoundMove; 
 
