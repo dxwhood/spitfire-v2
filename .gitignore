@@ -60,3 +60,6 @@ vgcore.*
 notes.txt
 scratch.txt
 perft.py
+
+/lichess-bot/
+/lichess-bot/*
